@@ -10,7 +10,8 @@ def fetch_ris_items(ris_id: int):
                 i.ProductName, 
                 rd.Qty, 
                 rd.UnitPrice,
-                rd.Status
+                rd.Status,
+                i.StockQty
             FROM RIS_Details rd
             LEFT JOIN Item i ON rd.ItemId = i.ItemId
             WHERE rd.RIS_id = ?

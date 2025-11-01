@@ -14,6 +14,7 @@ def fetch_items():
             i.Description,
             i.UnitPrice,
             i.Status,
+            i.StockQty,
             i.DateCreated
         FROM Item i
         INNER JOIN Category c ON i.CategoryId = c.CategoryId

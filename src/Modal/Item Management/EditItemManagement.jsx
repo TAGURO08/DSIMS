@@ -9,6 +9,7 @@ function EditItemManagement({ isEditOpen, onClose, item, onItemUpdated }) {
     Description: "",
     CategoryName: "",
     UnitPrice: "",
+    StockQty: "",
   });
   const [errors, setErrors] = useState({});
 
@@ -32,6 +33,7 @@ function EditItemManagement({ isEditOpen, onClose, item, onItemUpdated }) {
         Description: item.Description || "",
         CategoryName: item.CategoryName || "",
         UnitPrice: item.UnitPrice || "",
+        StockQty: item.StockQty || "",
       });
     }
   }, [item]);
@@ -69,6 +71,7 @@ function EditItemManagement({ isEditOpen, onClose, item, onItemUpdated }) {
             description: formData.Description,
             categoryName: formData.CategoryName,
             unitPrice: parseFloat(formData.UnitPrice),
+            stockQty: parseInt(formData.StockQty),
           }),
         }
       );
@@ -77,9 +80,9 @@ function EditItemManagement({ isEditOpen, onClose, item, onItemUpdated }) {
 
       if (data.status === "success") {
         alert("✅ Item updated successfully!");
-        onClose(); // ✅ Close modal
+        onClose();
         if (onItemUpdated) {
-          onItemUpdated(); // ✅ Refresh table
+          onItemUpdated();
         }
       } else {
         alert(`❌ Failed to update item: ${data.message || "Unknown error"}`);
@@ -168,6 +171,22 @@ function EditItemManagement({ isEditOpen, onClose, item, onItemUpdated }) {
             />
             {errors.UnitPrice && (
               <p className="text-red-500 text-xs mt-1">{errors.UnitPrice}</p>
+            )}
+          </div>
+
+          <div>
+            <input
+              type="number"
+              name="StockQty"
+              value={formData.StockQty}
+              onChange={handleChange}
+              placeholder="Stock Quantity"
+              className={`w-full border rounded px-3 py-2 text-sm focus:outline-none ${
+                errors.StockQty ? "border-red-500" : "focus:ring-blue-300"
+              }`}
+            />
+            {errors.StockQty && (
+              <p className="text-red-500 text-xs mt-1">{errors.StockQty}</p>
             )}
           </div>
         </div>

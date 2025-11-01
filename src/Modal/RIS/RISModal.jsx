@@ -3,11 +3,13 @@ import Select from "react-select";
 import { MdClose } from "react-icons/md";
 
 function RISModal({ isAddOpen, onClose, onSuccess }) {
-  if (!isAddOpen) return null;
+  const containerClass = `fixed inset-0 flex items-center justify-center bg-black/50 z-50 ${
+    !isAddOpen ? "hidden" : ""
+  }`;
 
   const [items, setItems] = useState([]);
   const [rows, setRows] = useState([
-    { itemName: "", quantity: "", orderBy: "" },
+    { itemName: "", quantity: "", orderBy: "", stockQty: 0 },
   ]);
   const [errors, setErrors] = useState({});
 
@@ -15,14 +17,13 @@ function RISModal({ isAddOpen, onClose, onSuccess }) {
     fetch("http://127.0.0.1:8000/item/select-list")
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) setItems(data);
-        else if (Array.isArray(data.data)) setItems(data.data);
-        else {
-          const arr = Object.keys(data).map((key) => ({
-            value: key,
-            label: data[key],
+        if (data.status === "success" && Array.isArray(data.data)) {
+          const formatted = data.data.map((item) => ({
+            value: item.value,
+            label: item.label,
+            StockQty: item.StockQty ?? 0,
           }));
-          setItems(arr);
+          setItems(formatted);
         }
       })
       .catch((err) => console.error("Error fetching items:", err));
@@ -31,16 +32,39 @@ function RISModal({ isAddOpen, onClose, onSuccess }) {
   const handleRowChange = (index, field, value) => {
     const updated = [...rows];
     updated[index][field] = value;
+
+    if (field === "itemName") {
+      const selected = items.find((i) => i.value === value);
+      updated[index].stockQty = selected ? selected.StockQty : 0;
+    }
+
+    if (field === "quantity") {
+      const qty = parseInt(value) || 0;
+      const stock = updated[index].stockQty || 0;
+      if (qty > stock) {
+        setErrors((prev) => ({
+          ...prev,
+          [`quantity-${index}`]: `Not enough stock. Available: ${stock}`,
+        }));
+      } else {
+        const newErrors = { ...errors };
+        delete newErrors[`quantity-${index}`];
+        setErrors(newErrors);
+      }
+    }
+
     setRows(updated);
   };
 
   const addRow = () => {
-    setRows([...rows, { itemName: "", quantity: "" }]);
+    setRows([
+      ...rows,
+      { itemName: "", quantity: "", orderBy: "", stockQty: 0 },
+    ]);
   };
 
   const removeRow = (index) => {
-    const updated = rows.filter((_, i) => i !== index);
-    setRows(updated);
+    setRows(rows.filter((_, i) => i !== index));
   };
 
   const validate = () => {
@@ -59,15 +83,15 @@ function RISModal({ isAddOpen, onClose, onSuccess }) {
   const handleSave = async () => {
     if (!validate()) return;
 
-    try {
-      const payload = {
-        order_by: rows[0].orderBy,
-        items: rows.map((r) => ({
-          item_id: r.itemName,
-          quantity: parseInt(r.quantity),
-        })),
-      };
+    const payload = {
+      order_by: rows[0].orderBy,
+      items: rows.map((r) => ({
+        item_id: r.itemName,
+        quantity: parseInt(r.quantity),
+      })),
+    };
 
+    try {
       const res = await fetch("http://127.0.0.1:8000/ris/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -90,12 +114,10 @@ function RISModal({ isAddOpen, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+    <div className={containerClass}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-gray-200">
         <div className="flex justify-between items-center border-b pb-3 mb-5">
-          <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-            Add RIS
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-800">Add RIS</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 text-2xl font-bold cursor-pointer">
@@ -106,7 +128,7 @@ function RISModal({ isAddOpen, onClose, onSuccess }) {
         <div className="space-y-5 max-h-[400px] overflow-y-auto pr-1">
           {rows.map((row, index) => (
             <div
-              key={`row-${index}`}
+              key={index}
               className="relative bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm">
               <div className="grid grid-cols-1 gap-3">
                 <div>
@@ -114,8 +136,10 @@ function RISModal({ isAddOpen, onClose, onSuccess }) {
                     Item
                   </label>
                   <Select
-                    options={items}
-                    placeholder="Select Item"
+                    options={items.map((i) => ({
+                      value: i.value,
+                      label: `${i.label} (Stock: ${i.StockQty})`,
+                    }))}
                     value={
                       row.itemName
                         ? items.find((opt) => opt.value === row.itemName)
@@ -124,19 +148,6 @@ function RISModal({ isAddOpen, onClose, onSuccess }) {
                     onChange={(selected) =>
                       handleRowChange(index, "itemName", selected?.value || "")
                     }
-                    classNamePrefix="react-select"
-                    styles={{
-                      control: (base, state) => ({
-                        ...base,
-                        borderColor: errors[`itemName-${index}`]
-                          ? "#EF4444"
-                          : state.isFocused
-                          ? "#60A5FA"
-                          : "black",
-                        boxShadow: "none",
-                        fontSize: "0.875rem",
-                      }),
-                    }}
                   />
                   {errors[`itemName-${index}`] && (
                     <p className="text-red-500 text-xs mt-1">
@@ -151,7 +162,6 @@ function RISModal({ isAddOpen, onClose, onSuccess }) {
                   </label>
                   <input
                     type="number"
-                    placeholder="Enter quantity"
                     value={row.quantity}
                     onChange={(e) =>
                       handleRowChange(index, "quantity", e.target.value)
@@ -176,7 +186,6 @@ function RISModal({ isAddOpen, onClose, onSuccess }) {
                     </label>
                     <input
                       type="text"
-                      placeholder="Enter order by"
                       value={row.orderBy}
                       onChange={(e) =>
                         handleRowChange(index, "orderBy", e.target.value)

@@ -55,9 +55,10 @@ function ApproveRISModal({ isOpen, onClose, risRow, onApprove }) {
     }
 
     const payload = {
-      ris_detail_id: risRow.RIS_Details_id,
-      supplier_id: selectedSupplier.value,
-      user_id: userId, // ✅ include user id
+      ris_detail_id: Number(item?.RID_details_id || 0),
+      supplier_id: Number(selectedSupplier?.value || 0),
+      qty_to_order: Number(QtyToOrder || 0),
+      user_id: Number(currentUserId || 0),
     };
 
     console.log("Sending approve request:", payload);

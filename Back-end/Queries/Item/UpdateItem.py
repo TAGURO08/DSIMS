@@ -8,13 +8,12 @@ def edit_item_query(item_id, updated_data):
 
         cursor = conn.cursor()
 
-        # Get values from request body
         product_name = updated_data.get("productName")
         description = updated_data.get("description")
         category_name = updated_data.get("categoryName")
         unit_price = updated_data.get("unitPrice")
+        stock_qty = updated_data.get("stockQty")
 
-        # 🔍 Find category ID by name
         cursor.execute("SELECT CategoryId FROM Category WHERE CategoryName = ?", (category_name,))
         result = cursor.fetchone()
         if not result:
@@ -23,12 +22,11 @@ def edit_item_query(item_id, updated_data):
 
         category_id = result[0]
 
-        # 🔄 Update item
         cursor.execute("""
             UPDATE Item
-            SET ProductName = ?, Description = ?, CategoryId = ?, UnitPrice = ?
+            SET ProductName = ?, Description = ?, CategoryId = ?, UnitPrice = ?, StockQty = ?
             WHERE ItemId = ?
-        """, (product_name, description, category_id, unit_price, item_id))
+        """, (product_name, description, category_id, unit_price, stock_qty, item_id))
 
         conn.commit()
         conn.close()

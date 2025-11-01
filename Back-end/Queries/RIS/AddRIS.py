@@ -13,7 +13,6 @@ def add_ris_transaction(data):
             return {"status": "error", "message": "Missing required fields"}
 
         date_requested = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
         cursor.execute("""
             INSERT INTO RIS (Status, Order_by, DateRequested)
             OUTPUT INSERTED.RIS_id
@@ -23,26 +22,24 @@ def add_ris_transaction(data):
         ris_id_row = cursor.fetchone()
         if not ris_id_row:
             raise Exception("Failed to retrieve RIS_id after insert")
-
         ris_id = ris_id_row[0]
 
         date_created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         for item in items:
             item_id = item.get("item_id")
-            quantity = item.get("quantity")
+            quantity = int(item.get("quantity", 0))
 
-            if not item_id or not quantity:
+            if not item_id or quantity <= 0:
                 continue
 
-            cursor.execute("SELECT UnitPrice FROM Item WHERE ItemId = ?", (item_id,))
+            cursor.execute("SELECT UnitPrice, StockQty FROM Item WHERE ItemId = ?", (item_id,))
             row = cursor.fetchone()
             if not row:
                 return {"status": "error", "message": f"ItemId {item_id} not found"}
 
-            unit_price = float(row[0])
-
-            total_price = unit_price * int(quantity)
+            unit_price, stock_qty = row
+            total_price = unit_price * quantity
 
             cursor.execute("""
                 INSERT INTO RIS_Details (ItemId, RIS_id, Qty, DateCreated, UnitPrice)
@@ -55,6 +52,5 @@ def add_ris_transaction(data):
     except Exception as e:
         conn.rollback()
         return {"status": "error", "message": str(e)}
-
     finally:
         conn.close()

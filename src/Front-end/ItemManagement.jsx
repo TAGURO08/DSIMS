@@ -45,6 +45,7 @@ function ItemManagement() {
       Description: item.Description,
       Category: item.CategoryName,
       "Unit Price": `₱${item.UnitPrice.toLocaleString()}`,
+      "Stock Quantity": item.StockQty,
       "Date Created": new Date(item.DateCreated).toLocaleString(),
     }));
 
@@ -75,15 +76,26 @@ function ItemManagement() {
       selector: (row) => row.UnitPrice,
       sortable: true,
       cell: (row) => (
-        <span>
-          ₱{row.UnitPrice ? Number(row.UnitPrice).toLocaleString() : "—"}
-        </span>
+        <div className="w-full text-right pr-2">
+          {row.UnitPrice ? Number(row.UnitPrice).toLocaleString() : "0"}
+        </div>
       ),
-      right: true,
+    },
+    {
+      name: "Stock Quantity",
+      selector: (row) => row.StockQty,
+      sortable: true,
+      cell: (row) => (
+        <div className="w-full text-right pr-2">
+          {row.StockQty !== null && row.StockQty !== undefined
+            ? Number(row.StockQty).toLocaleString()
+            : "0"}
+        </div>
+      ),
     },
     {
       name: "Date Created",
-      selector: (row) => new Date(row.DateCreated).toLocaleString(),
+      selector: (row) => new Date(row.DateCreated).toDateString(),
       sortable: true,
     },
     {
@@ -95,7 +107,7 @@ function ItemManagement() {
               setSelectedItem(row);
               setEditIsOpen(true);
             }}
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium transition">
+            className="px-3 py-1 bg-blue-600 cursor-pointer hover:bg-blue-700 text-white rounded-md text-xs font-medium transition">
             Edit
           </button>
           <button
@@ -103,7 +115,7 @@ function ItemManagement() {
               setDeleteItem(row);
               setDeleteIsOpen(true);
             }}
-            className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-md text-xs font-medium transition">
+            className="px-3 py-1 bg-red-600 cursor-pointer hover:bg-red-700 text-white rounded-md text-xs font-medium transition">
             Delete
           </button>
         </div>
@@ -138,7 +150,6 @@ function ItemManagement() {
 
   return (
     <div className="w-full h-full">
-      {/* Header */}
       <div className="flex justify-between items-center p-4 bg-[#172554] text-white rounded-lg shadow-md">
         <div className="flex items-center gap-2">
           <RiFileList3Fill className="text-2xl" />
@@ -150,14 +161,14 @@ function ItemManagement() {
         <div className="flex justify-between items-center mb-4">
           <button
             onClick={() => setAddIsOpen(true)}
-            className="flex items-center gap-2 px-3 py-2 bg-green-700 hover:bg-green-600 text-white rounded-md border border-green-800 transition font-medium">
+            className="flex items-center cursor-pointer gap-2 px-3 py-2 bg-green-700 hover:bg-green-600 text-white rounded-md border border-green-800 transition font-medium">
             <IoMdAdd className="text-lg" />
             Add Item
           </button>
 
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-3 py-2 bg-green-800 hover:bg-green-700 text-white rounded-md border border-green-900 transition font-medium">
+            className="flex items-center cursor-pointer gap-2 px-3 py-2 bg-green-800 hover:bg-green-700 text-white rounded-md border border-green-900 transition font-medium">
             <FaFileExcel className="text-lg" />
             Export
           </button>

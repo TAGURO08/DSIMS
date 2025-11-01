@@ -14,8 +14,8 @@ def add_item(item_data):
             return {"status": "error", "message": "Invalid CategoryId. Category does not exist."}
 
         query = """
-        INSERT INTO Item (ProductName, CategoryId, Description, UnitPrice, Status, DateCreated)
-        VALUES (?, ?, ?, ?, 'Active', GETDATE())
+        INSERT INTO Item (ProductName, CategoryId, Description, UnitPrice, StockQty, Status, DateCreated)
+        VALUES (?, ?, ?, ?, ?, 'Active', GETDATE())
         """
 
         cursor.execute(
@@ -25,6 +25,7 @@ def add_item(item_data):
                 item_data["categoryId"],
                 item_data["description"],
                 item_data["unitPrice"],
+                item_data["stockQty"],
             ),
         )
 

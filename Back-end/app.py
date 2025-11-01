@@ -202,6 +202,7 @@ class ItemUpdate(BaseModel):
     description: str
     categoryName: str
     unitPrice: float
+    stockQty: int
 
 @app.put("/item/update/{item_id}")
 def update_item(item_id: int, item: ItemUpdate):
@@ -237,7 +238,7 @@ def add_ris_route(ris: dict):
 @app.get("/item/list")
 def list_items():
     try:
-        result = fetch_ris_data()
+        result = fetch_items()
         if result["status"] == "error":
             raise HTTPException(status_code=500, detail=result["message"])
         return result
@@ -248,13 +249,16 @@ class ApproveRISRequest(BaseModel):
     ris_detail_id: int
     supplier_id: int
     user_id: int
+    qty_to_order: int
 
 @app.post("/approve_ris")
 def approve_ris(data: ApproveRISRequest):
-    result = approve_ris_query(data.ris_detail_id, data.supplier_id, data.user_id)
+    print("Received data:", data)
+    result = approve_ris_query(data.ris_detail_id, data.supplier_id, data.qty_to_order, data.user_id)
     if result["status"] == "error":
         raise HTTPException(status_code=400, detail=result["message"])
     return result
+
 
 @app.get("/ris/list")
 def list_ris():
@@ -268,10 +272,7 @@ def list_ris():
 
 @app.get("/ris/items/{ris_id}")
 def get_ris_items(ris_id: int):
-    try:
-        result = fetch_ris_items(ris_id)
-        if result["status"] == "error":
-            raise HTTPException(status_code=500, detail=result["message"])
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    result = fetch_ris_items(ris_id)
+    if result["status"] == "error":
+        raise HTTPException(status_code=500, detail=result["message"])
+    return result

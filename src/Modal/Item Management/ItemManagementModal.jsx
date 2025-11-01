@@ -47,6 +47,7 @@ function ItemManagementModal({ isAddOpen, onClose, onItemAdded }) {
             categoryId: parseInt(formData.category),
             description: formData.description,
             unitPrice: parseFloat(formData.unit),
+            stockQty: parseInt(formData.quantity),
           }),
         });
 
@@ -73,7 +74,7 @@ function ItemManagementModal({ isAddOpen, onClose, onItemAdded }) {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px] z-40">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 border">
         <div className="flex justify-between items-center border-b pb-1 mb-4">
           <h2 className="text-lg font-semibold text-gray-800">Add Item</h2>
