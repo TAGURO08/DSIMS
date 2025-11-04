@@ -5,6 +5,8 @@ function SupplierModal({ isOpen, onClose, item }) {
   const [suppliers, setSuppliers] = useState([]);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     if (isOpen) {
@@ -33,6 +35,42 @@ function SupplierModal({ isOpen, onClose, item }) {
     value: s.SupplierId,
     label: s.SupplierName,
   }));
+
+  const handleApprove = async () => {
+    if (!selectedSupplier) {
+      alert("Please select a supplier first.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const response = await fetch("http://localhost:8000/purchase_order/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          SupplierId: selectedSupplier.value,
+          RID_details_id: item?.RID_details_id,
+          QtyToOrder: QtyToOrder,
+          id: user.id,
+        }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert(`✅ ${result.message}\nPO Number: ${result.PO_Number}`);
+        onClose();
+      } else {
+        alert(`❌ Failed: ${result.detail || "Unknown error"}`);
+      }
+    } catch (err) {
+      console.error("Error approving:", err);
+      alert("Error sending request to the server.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
@@ -81,11 +119,18 @@ function SupplierModal({ isOpen, onClose, item }) {
           </div>
         )}
 
-        <div className="mt-6 flex justify-end space-x-3">
+        <div className="mt-6 flex justify-between space-x-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-300 text-gray-800 text-sm cursor-pointer rounded-lg hover:bg-gray-400 transition">
+            className="px-4 py-2 bg-red-600 text-white text-sm cursor-pointer rounded-lg hover:bg-red-800 transition"
+            disabled={submitting}>
             Close
+          </button>
+          <button
+            onClick={handleApprove}
+            className="px-4 py-2 bg-green-600 text-white text-sm cursor-pointer rounded-lg hover:bg-green-800 transition"
+            disabled={submitting}>
+            {submitting ? "Processing..." : "Approve"}
           </button>
         </div>
       </div>

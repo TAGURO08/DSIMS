@@ -26,8 +26,9 @@ from Queries.Item.DeleteItem import update_item_status
 from Queries.RIS.GetItemList import get_item_list
 from Queries.RIS.AddRIS import add_ris_transaction
 from Queries.RIS.FetchRIS import fetch_ris_data
-from Queries.RIS.Approve_ris import approve_ris_query
 from Queries.RIS.fetch_ris_items import fetch_ris_items
+from Queries.RIS.Approve_ris import add_purchase_order_query
+from Queries.RIS.Direct_Approve import approve_ris_item_query
 app = FastAPI()
 
 app.add_middleware(
@@ -245,21 +246,6 @@ def list_items():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-class ApproveRISRequest(BaseModel):
-    ris_detail_id: int
-    supplier_id: int
-    user_id: int
-    qty_to_order: int
-
-@app.post("/approve_ris")
-def approve_ris(data: ApproveRISRequest):
-    print("Received data:", data)
-    result = approve_ris_query(data.ris_detail_id, data.supplier_id, data.qty_to_order, data.user_id)
-    if result["status"] == "error":
-        raise HTTPException(status_code=400, detail=result["message"])
-    return result
-
-
 @app.get("/ris/list")
 def list_ris():
     try:
@@ -275,4 +261,26 @@ def get_ris_items(ris_id: int):
     result = fetch_ris_items(ris_id)
     if result["status"] == "error":
         raise HTTPException(status_code=500, detail=result["message"])
+    return result
+
+class PurchaseOrderRequest(BaseModel):
+    SupplierId: int
+    RID_details_id: int
+    QtyToOrder: int
+    id: int
+
+@app.post("/purchase_order/add")
+def add_purchase_order(data: PurchaseOrderRequest):
+    return add_purchase_order_query(
+        data.SupplierId, data.RID_details_id, data.QtyToOrder, data.id
+    )
+    if result["status"] == "error":
+        raise HTTPException(status_code=500, detail=result["message"])
+    return result
+
+@app.post("/ris/approve")
+def approve_ris_item(data: dict):
+    result = approve_ris_item_query(data["RID_details_id"], data["user_id"])
+    if result["status"] == "error":
+        raise HTTPException(status_code=400, detail=result["message"])
     return result

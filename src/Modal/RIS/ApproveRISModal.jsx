@@ -45,7 +45,6 @@ function ApproveRISModal({ isOpen, onClose, risRow, onApprove }) {
       return;
     }
 
-    // ✅ Get user info from local storage
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user?.id;
 

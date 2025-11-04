@@ -33,6 +33,50 @@ function ViewItemModal({ isOpen, onClose, risId }) {
     setIsSupplierModalOpen(true);
   };
 
+  // ✅ Function to handle item approval
+  const handleApprove = async (item) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || !user.id) {
+        alert("User not found. Please log in again.");
+        return;
+      }
+
+      const confirmApprove = window.confirm(
+        `Are you sure you want to approve "${item.ProductName}"?`
+      );
+      if (!confirmApprove) return;
+
+      const response = await fetch("http://127.0.0.1:8000/ris/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          RID_details_id: item.RID_details_id,
+          user_id: user.id,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.status === "success") {
+        alert("✅ " + result.message);
+        // Refresh list to show updated status
+        setItems((prev) =>
+          prev.map((it) =>
+            it.RID_details_id === item.RID_details_id
+              ? { ...it, Status: "Approved" }
+              : it
+          )
+        );
+      } else {
+        alert("❌ Failed: " + (result.message || "Unknown error"));
+      }
+    } catch (err) {
+      console.error("Approval failed:", err);
+      alert("Error approving item. Please try again.");
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -107,6 +151,7 @@ function ViewItemModal({ isOpen, onClose, risId }) {
                         <td className="px-4 py-3 border-t border-gray-200 text-center">
                           {canApprove ? (
                             <button
+                              onClick={() => handleApprove(item)}
                               disabled={isDisabled}
                               className={`px-3 py-1.5 text-xs rounded-md shadow text-white transition ${
                                 isDisabled
@@ -146,6 +191,7 @@ function ViewItemModal({ isOpen, onClose, risId }) {
         </div>
       </div>
 
+      {/* Supplier Modal */}
       <SupplierModal
         isOpen={isSupplierModalOpen}
         onClose={() => setIsSupplierModalOpen(false)}
