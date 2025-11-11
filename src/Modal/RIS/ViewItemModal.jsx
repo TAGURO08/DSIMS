@@ -119,7 +119,7 @@ function ViewItemModal({ isOpen, onClose, risId }) {
                   {items.map((item, index) => {
                     const canApprove = item.Qty <= item.StockQty; // ✅ can approve if stock is enough
                     const isDisabled =
-                      item.Status === "Approved" || item.Status === "Rejected";
+                      item.Status === "For Delivery" || item.Status === "Rejected";
 
                     return (
                       <tr

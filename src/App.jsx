@@ -22,6 +22,7 @@ import Login from "./Front-end/Login";
 import ProtectedRoute from "./Front-end/ProtectedRoute";
 import RequestStock from "./Front-end/RequestStock";
 import CurrentStock from "./Front-end/CurrentStock";
+import Delivery from "./Front-end/Delivery";
 
 function AppLayout({ open, setOpen }) {
   const location = useLocation();
@@ -74,6 +75,14 @@ function AppLayout({ open, setOpen }) {
             element={
               <ProtectedRoute>
                 <RIS />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="delivery"
+            element={
+              <ProtectedRoute>
+                <Delivery />
               </ProtectedRoute>
             }
           />

@@ -130,7 +130,7 @@ function SupplierModal({ isOpen, onClose, item }) {
             onClick={handleApprove}
             className="px-4 py-2 bg-green-600 text-white text-sm cursor-pointer rounded-lg hover:bg-green-800 transition"
             disabled={submitting}>
-            {submitting ? "Processing..." : "Approve"}
+            {submitting ? "Processing..." : "Order"}
           </button>
         </div>
       </div>

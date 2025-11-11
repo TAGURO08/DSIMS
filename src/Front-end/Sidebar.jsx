@@ -141,6 +141,21 @@ function Sidebar({ open, setOpen }) {
                 </NavLink>
               </li>
 
+              <li>
+                <NavLink
+                  to="/delivery"
+                  className={({ isActive }) =>
+                    `flex gap-2 rounded-lg border-white p-1 items-center transition-all ${
+                      isActive
+                        ? "bg-sky-700 border-l-4 text-white"
+                        : "hover:bg-sky-700 hover:border-l-4"
+                    }`
+                  }>
+                  <RiFileList3Fill className="text-[20px]" />
+                  Delivery
+                </NavLink>
+              </li>
+
               {/* Office Management */}
               <li>
                 <NavLink
