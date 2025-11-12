@@ -13,6 +13,7 @@ function Delivery() {
     fetch("http://localhost:8000/delivery/list")
       .then((res) => res.json())
       .then((data) => {
+        console.log("Fetched delivery data:", data); // 🔍 Debug log
         if (data.status === "success") setDeliveryData(data.data);
         else console.error("Error fetching delivery:", data.message);
       })
@@ -25,17 +26,27 @@ function Delivery() {
   }, []);
 
   const handleMarkDelivered = async (row) => {
-    try {
-      await fetch(`http://localhost:8000/delivery/mark-delivered/${row.Id}`, {
-        method: "PUT",
-      });
+    if (!window.confirm(`Mark ${row.ProductName} as delivered?`)) return;
 
-      setDeliveryData((prev) =>
-        prev.map((item) =>
-          item === row ? { ...item, Status: "Delivered" } : item
-        )
+    try {
+      const res = await fetch(
+        `http://localhost:8000/delivery/mark-delivered/${row.PurchaseId}`,
+        { method: "PUT" }
       );
-      alert(`${row.ProductName} marked as delivered!`);
+      const data = await res.json();
+
+      if (data.status === "success") {
+        setDeliveryData((prev) =>
+          prev.map((item) =>
+            item.PurchaseId === row.PurchaseId
+              ? { ...item, Status: "Delivered" }
+              : item
+          )
+        );
+        alert(`${row.ProductName} marked as delivered!`);
+      } else {
+        alert("Error: " + (data.message || "Unknown error occurred"));
+      }
     } catch (err) {
       console.error(err);
       alert("Failed to update status");
@@ -90,9 +101,13 @@ function Delivery() {
       cell: (row) => (
         <button
           onClick={() => handleMarkDelivered(row)}
-          className="py-1 px-1 cursor-pointer bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs font-medium"
+          className={`py-1 px-1 cursor-pointer rounded-md text-xs font-medium ${
+            row.Status === "Delivered"
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700 text-white"
+          }`}
           disabled={row.Status === "Delivered"}>
-          Mark as Delivered
+          {row.Status === "Delivered" ? "Delivered" : "Mark as Delivered"}
         </button>
       ),
       ignoreRowClick: true,

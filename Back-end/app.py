@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Request
+import logging
 from fastapi.middleware.cors import CORSMiddleware
 from flask import jsonify
 from pydantic import BaseModel
@@ -30,6 +31,7 @@ from Queries.RIS.fetch_ris_items import fetch_ris_items
 from Queries.RIS.Approve_ris import add_purchase_order_query
 from Queries.RIS.Direct_Approve import approve_ris_item_query
 from Queries.Delivery.FetchDelivery import fetch_delivery_data
+from Queries.Delivery.SaveDelivery import mark_as_delivered
 app = FastAPI()
 
 app.add_middleware(
@@ -290,5 +292,13 @@ def approve_ris_item(data: dict):
 def get_delivery():
     result = fetch_delivery_data()
     if result["status"] == "error":
+        raise HTTPException(status_code=500, detail=result["message"])
+    return result
+
+@app.put("/delivery/mark-delivered/{purchase_id}")
+def mark_delivered(purchase_id: int):
+    logging.debug(f"Marking PurchaseId {purchase_id} as delivered")
+    result = mark_as_delivered(purchase_id)
+    if result["status"] != "success":
         raise HTTPException(status_code=500, detail=result["message"])
     return result

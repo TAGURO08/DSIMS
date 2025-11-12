@@ -5,7 +5,7 @@ def fetch_delivery_data():
     cursor = conn.cursor()
     try:
         query = """
-            SELECT I.ProductName, S.SupplierName, PO.QtyToOrder, PO.DateApproved, RD.Status
+            SELECT PO.PurchaseId, I.ProductName, S.SupplierName, PO.QtyToOrder, PO.DateApproved, RD.Status
             FROM Purchase_Order PO
             JOIN Supplier S ON PO.SupplierId = S.SupplierId
             JOIN RIS_Details RD ON PO.RID_details_id = RD.RID_details_id
@@ -16,11 +16,12 @@ def fetch_delivery_data():
         data = []
         for row in rows:
             data.append({
-                "ProductName": row.ProductName,
-                "SupplierName": row.SupplierName,
-                "QtyToOrder": row.QtyToOrder,
-                "DateApproved": row.DateApproved.strftime("%Y-%m-%d") if row.DateApproved else None,
-                "Status": row.Status
+                "PurchaseId": row[0],
+                "ProductName": row[1],
+                "SupplierName": row[2],
+                "QtyToOrder": row[3],
+                "DateApproved": row[4].strftime("%Y-%m-%d") if row[4] else None,
+                "Status": row[5]
             })
         return {"status": "success", "data": data}
     except Exception as e:
