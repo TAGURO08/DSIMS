@@ -297,8 +297,8 @@ def get_delivery():
 
 @app.put("/delivery/mark-delivered/{purchase_id}")
 def mark_delivered(purchase_id: int):
-    logging.debug(f"Marking PurchaseId {purchase_id} as delivered")
+    """Mark a purchase order as delivered and update StockCard"""
     result = mark_as_delivered(purchase_id)
     if result["status"] != "success":
         raise HTTPException(status_code=500, detail=result["message"])
-    return result
+    return {"status": "success", "message": result["message"]}

@@ -7,18 +7,25 @@ import { saveAs } from "file-saver";
 function Delivery() {
   const [deliveryData, setDeliveryData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [markingId, setMarkingId] = useState(null);
 
-  const fetchDelivery = () => {
+  const fetchDelivery = async () => {
     setLoading(true);
-    fetch("http://localhost:8000/delivery/list")
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Fetched delivery data:", data); // 🔍 Debug log
-        if (data.status === "success") setDeliveryData(data.data);
-        else console.error("Error fetching delivery:", data.message);
-      })
-      .catch((err) => console.error("Error fetching delivery:", err))
-      .finally(() => setLoading(false));
+    try {
+      const res = await fetch("http://localhost:8000/delivery/list");
+      const data = await res.json();
+      if (data.status === "success") {
+        setDeliveryData(data.data);
+      } else {
+        console.error("Error fetching delivery:", data.message);
+        setDeliveryData([]);
+      }
+    } catch (err) {
+      console.error("Error fetching delivery:", err);
+      setDeliveryData([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -28,6 +35,7 @@ function Delivery() {
   const handleMarkDelivered = async (row) => {
     if (!window.confirm(`Mark ${row.ProductName} as delivered?`)) return;
 
+    setMarkingId(row.PurchaseId);
     try {
       const res = await fetch(
         `http://localhost:8000/delivery/mark-delivered/${row.PurchaseId}`,
@@ -35,21 +43,17 @@ function Delivery() {
       );
       const data = await res.json();
 
-      if (data.status === "success") {
-        setDeliveryData((prev) =>
-          prev.map((item) =>
-            item.PurchaseId === row.PurchaseId
-              ? { ...item, Status: "Delivered" }
-              : item
-          )
-        );
+      if (res.ok && data.status === "success") {
         alert(`${row.ProductName} marked as delivered!`);
+        fetchDelivery();
       } else {
-        alert("Error: " + (data.message || "Unknown error occurred"));
+        alert("Error: " + (data.message || "Unknown error"));
       }
     } catch (err) {
       console.error(err);
       alert("Failed to update status");
+    } finally {
+      setMarkingId(null);
     }
   };
 
@@ -101,13 +105,17 @@ function Delivery() {
       cell: (row) => (
         <button
           onClick={() => handleMarkDelivered(row)}
-          className={`py-1 px-1 cursor-pointer rounded-md text-xs font-medium ${
+          className={`py-1 px-2 rounded-md text-xs font-medium ${
             row.Status === "Delivered"
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-600 hover:bg-blue-700 text-white"
           }`}
-          disabled={row.Status === "Delivered"}>
-          {row.Status === "Delivered" ? "Delivered" : "Mark as Delivered"}
+          disabled={row.Status === "Delivered" || markingId === row.PurchaseId}>
+          {markingId === row.PurchaseId
+            ? "Marking..."
+            : row.Status === "Delivered"
+            ? "Delivered"
+            : "Mark as Delivered"}
         </button>
       ),
       ignoreRowClick: true,
@@ -147,18 +155,15 @@ function Delivery() {
           <FaTruck className="text-2xl" />
           <h1 className="text-lg font-semibold">Delivery</h1>
         </div>
+        <button
+          onClick={handleExport}
+          className="flex items-center gap-2 px-3 py-2 bg-green-800 hover:bg-green-700 text-white rounded-md border border-green-900 transition font-medium">
+          <FaFileExcel className="text-lg" />
+          Export
+        </button>
       </div>
 
       <div className="bg-white rounded-lg shadow-md mt-4 p-5 border border-gray-200">
-        <div className="flex justify-between items-center mb-4">
-          <button
-            onClick={handleExport}
-            className="flex items-center gap-2 px-3 py-2 bg-green-800 hover:bg-green-700 text-white rounded-md border border-green-900 transition font-medium">
-            <FaFileExcel className="text-lg" />
-            Export
-          </button>
-        </div>
-
         <DataTable
           columns={columns}
           data={deliveryData}
