@@ -4,10 +4,10 @@ def get_connection():
     try:
         conn = pyodbc.connect(
             "DRIVER={ODBC Driver 17 for SQL Server};"
-            "SERVER=EUGENE;"
+            "SERVER=LAPTOP-VNSR2M10\SQLEXPRESS;"
             "DATABASE=DSIMS;"
             "UID=sa;"
-            "PWD=eugene1234;"
+            "PWD=jervin15;"
         )
         print("Connection Successful!")
         return conn

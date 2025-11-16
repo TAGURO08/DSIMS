@@ -1,157 +1,136 @@
 import React, { useState, useEffect } from "react";
 
 function RequestStock() {
-  const [items, setItems] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingItem, setEditingItem] = useState(null);
-  const [loading, setLoading] = useState(false);
 
-  // Fetch data on component mount
   useEffect(() => {
-    fetchItems();
-    fetchCategories();
-    fetchSuppliers();
+    fetchRequests();
   }, []);
 
-  const fetchItems = async () => {
+  const fetchRequests = async () => {
     try {
-      const response = await fetch("/api/stock/items");
+      const response = await fetch("/api/stock/requests");
       const data = await response.json();
       if (data.status === "success") {
-        setItems(data.data);
+        setRequests(data.data);
       }
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error("Error fetching requests:", error);
     }
   };
 
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch("/api/category/list");
-      const data = await response.json();
-      if (data.status === "success") {
-        setCategories(data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
-  const fetchSuppliers = async () => {
-    try {
-      const response = await fetch("/api/supplier/fetch");
-      const data = await response.json();
-      if (data.status === "success") {
-        setSuppliers(data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching suppliers:", error);
-    }
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    fetchItems(); // Optional: Modify to include search params if needed
-  };
-
-  const filteredItems = items.filter(
-    (item) =>
-      item.productName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.categoryName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.supplier_name?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredRequests = requests.filter(
+    (req) =>
+      req.item_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      req.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      req.office_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="w-full">
-      {/* Header */}
-      <div className="header bg-blue-600 text-white p-4 rounded-lg mb-6 shadow-md">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold">Item Stock Card Management</h2>
-          <button className="btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-            <i className="fa-solid fa-file-export mr-2"></i> Generate Report
-          </button>
-        </div>
+    <div className="w-full bg-white rounded-lg shadow-md p-6">
+      {/* Header Section */}
+      <div className="bg-[#0f2c56] text-white px-6 py-3 rounded-t-lg -mx-6 -mt-6 mb-6 flex justify-between items-center">
+        <h1 className="text-lg font-semibold flex items-center gap-2">
+          📋 Request List
+        </h1>
       </div>
 
-      {/* Search Form */}
-      <div className="card bg-white rounded-lg shadow-md p-6 mb-6">
-        <form onSubmit={handleSearch} className="search-form flex gap-2">
-          <input
-            type="text"
-            placeholder="Search items..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-2 flex-1 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-          />
+      {/* Search Bar + Export Button */}
+      <div className="mb-6 flex items-center justify-between">
+        <input
+          type="text"
+          placeholder="Search item, category, or office..."
+          className="border border-gray-300 rounded-md px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-[#0f2c56]"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+
+        <div className="flex items-center gap-2">
           <button
-            type="submit"
-            className="btn bg-gray-100 border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-200">
-            <i className="fa-solid fa-search mr-2"></i> Search
+            onClick={() => window.print()}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+          >
+            Export
           </button>
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="btn bg-gray-100 border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-200">
-              <i className="fa-solid fa-rotate-left mr-2"></i> Reset
-            </button>
-          )}
-        </form>
+        </div>
       </div>
 
-      {/* Items Table */}
-      <div className="card bg-white rounded-lg shadow-md p-6">
-        <div className="card-header flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">
-            <i className="fa-solid fa-list mr-2"></i> Item Stock Card List
-          </h3>
-        </div>
+      {/* Table Section */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full border-collapse border border-gray-300">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                Item Name
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                Category
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                Office
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700">
+                Quantity
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700">
+                Status
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700">
+                Date Requested
+              </th>
+            </tr>
+          </thead>
 
-        <div className="table-wrap overflow-x-auto">
-          <table className="table w-full bg-white rounded-lg overflow-hidden">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="py-3 px-4 text-left font-medium text-gray-700">
-                  Item Name
-                </th>
-                <th className="py-3 px-4 text-left font-medium text-gray-700">
-                  Category
-                </th>
-                <th className="py-3 px-4 text-left font-medium text-gray-700">
-                  Quantity
-                </th>
-                <th className="py-3 px-4 text-left font-medium text-gray-700">
-                  Unit Price
-                </th>
-                <th className="py-3 px-4 text-left font-medium text-gray-700">
-                  Supplier
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredItems.map((item) => (
-                <tr key={item.id} className="border-b hover:bg-gray-50">
-                  <td className="py-3 px-4">{item.productName}</td>
-                  <td className="py-3 px-4">{item.categoryName}</td>
-                  <td className="py-3 px-4">{item.quantity || 0}</td>
-                  <td className="py-3 px-4">竄ｱ{item.unitPrice?.toFixed(2)}</td>
-                  <td className="py-3 px-4">{item.supplier_name}</td>
-                </tr>
-              ))}
-              {filteredItems.length === 0 && (
-                <tr>
-                  <td
-                    colSpan="5"
-                    className="py-4 px-4 text-center text-gray-500">
-                    No items found.
+          <tbody>
+            {filteredRequests.length > 0 ? (
+              filteredRequests.map((req, index) => (
+                <tr
+                  key={index}
+                  className="hover:bg-gray-50 transition duration-150"
+                >
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
+                    {req.item_name}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
+                    {req.category}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
+                    {req.office_name}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-center text-gray-700">
+                    {req.quantity}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-center">
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-medium ${
+                        req.status === "Approved"
+                          ? "bg-green-100 text-green-700"
+                          : req.status === "Pending"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {req.status}
+                    </span>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-center text-gray-700">
+                    {new Date(req.request_date).toLocaleDateString()}
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="6"
+                  className="text-center py-6 text-gray-500 text-sm"
+                >
+                  No request records found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

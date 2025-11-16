@@ -173,22 +173,24 @@ function Sidebar({ open, setOpen }) {
               </li>
 
               {/* Item Management */}
-              <li>
-                <NavLink
-                  to="/itemManagement"
-                  className={({ isActive }) =>
-                    `flex gap-2 rounded-lg border-white p-1 items-center transition-all ${
-                      isActive
-                        ? "bg-sky-700 border-l-4 text-white"
-                        : "hover:bg-sky-700 hover:border-l-4"
-                    }`
-                  }>
-                  <AiFillProduct className="text-[20px]" />
-                  Item Management
-                </NavLink>
-              </li>
-
+              {user && (user.role === "Admin" || user.role === "Programmer") && (
+                <li>
+                  <NavLink
+                    to="/itemManagement"
+                    className={({ isActive }) =>
+                      `flex gap-2 rounded-lg border-white p-1 items-center transition-all ${
+                        isActive
+                          ? "bg-sky-700 border-l-4 text-white"
+                          : "hover:bg-sky-700 hover:border-l-4"
+                      }`
+                    }>
+                    <AiFillProduct className="text-[20px]" />
+                    Item Management
+                  </NavLink>
+                </li>
+              )}
               {/* Supplier */}
+              {user && (user.role === "Admin" || user.role === "Programmer") && (
               <li>
                 <NavLink
                   to="/supplier"
@@ -203,22 +205,24 @@ function Sidebar({ open, setOpen }) {
                   Suppliers
                 </NavLink>
               </li>
-
+            )}
               {/* Category */}
-              <li>
-                <NavLink
-                  to="/category"
-                  className={({ isActive }) =>
-                    `flex gap-2 rounded-lg border-white p-1 items-center transition-all ${
-                      isActive
-                        ? "bg-sky-700 border-l-4 text-white"
-                        : "hover:bg-sky-700 hover:border-l-4"
-                    }`
-                  }>
-                  <FaTags className="text-[20px]" />
-                  Category
-                </NavLink>
-              </li>
+             {user && (user.role === "Admin" || user.role === "Programmer") && (
+                <li>
+                  <NavLink
+                    to="/category"
+                    className={({ isActive }) =>
+                      `flex gap-2 rounded-lg border-white p-1 items-center transition-all ${
+                        isActive
+                          ? "bg-sky-700 border-l-4 text-white"
+                          : "hover:bg-sky-700 hover:border-l-4"
+                      }`
+                    }>
+                    <FaTags className="text-[20px]" />
+                    Category
+                  </NavLink>
+                </li>
+              )}
             </ul>
 
             {/* User Management + Logout */}

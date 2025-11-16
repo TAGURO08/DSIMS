@@ -28,53 +28,87 @@ function CurrentStock() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-md">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-700">Current Stock</h1>
+    <div className="w-full bg-white rounded-lg shadow-md p-6">
+      {/* Header Section */}
+      <div className="bg-[#0f2c56] text-white px-6 py-3 rounded-t-lg -mx-6 -mt-6 mb-6 flex justify-between items-center">
+        <h1 className="text-lg font-semibold flex items-center gap-2">
+          📦 Current Stock
+        </h1>
       </div>
 
-      {/* Search Form */}
-      <form onSubmit={(e) => e.preventDefault()} className="mb-4 flex gap-2">
+      {/* Search Bar + Optional Export Button */}
+      <div className="mb-6 flex items-center justify-between">
         <input
           type="text"
           placeholder="Search item, category, or supplier..."
+          className="border border-gray-300 rounded-md px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-[#0f2c56]"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border border-gray-300 px-3 py-2 rounded-md w-full focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
         />
-        <button className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-md">
-          Search
-        </button>
-      </form>
 
-      {/* Stock Table */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => window.print()}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+          >
+            Export
+          </button>
+        </div>
+      </div>
+
+      {/* Table Section */}
       <div className="overflow-x-auto">
-        <table className="min-w-full text-sm border border-gray-200">
-          <thead className="bg-gray-200 text-gray-700">
+        <table className="min-w-full border-collapse border border-gray-300">
+          <thead className="bg-gray-100">
             <tr>
-              <th className="py-2 px-3 text-left">Item</th>
-              <th className="py-2 px-3 text-left">Category</th>
-              <th className="py-2 px-3 text-left">Supplier</th>
-              <th className="py-2 px-3 text-center">Quantity</th>
-              <th className="py-2 px-3 text-center">Unit Price</th>
+              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                Item
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                Category
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                Supplier
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700">
+                Quantity
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700">
+                Unit Price
+              </th>
             </tr>
           </thead>
+
           <tbody>
-            {filteredStocks.map((stock) => (
-              <tr key={stock.id} className="border-b hover:bg-gray-50">
-                <td className="py-2 px-3">{stock.item_name}</td>
-                <td className="py-2 px-3">{stock.category}</td>
-                <td className="py-2 px-3">{stock.supplier_name}</td>
-                <td className="py-2 px-3 text-center">{stock.quantity}</td>
-                <td className="py-2 px-3 text-center">
-                  竄ｱ{stock.unit_price?.toFixed(2)}
-                </td>
-              </tr>
-            ))}
-            {filteredStocks.length === 0 && (
+            {filteredStocks.length > 0 ? (
+              filteredStocks.map((stock, index) => (
+                <tr
+                  key={index}
+                  className="hover:bg-gray-50 transition duration-150"
+                >
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
+                    {stock.item_name}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
+                    {stock.category}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
+                    {stock.supplier_name}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-center text-gray-700">
+                    {stock.quantity}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-center text-gray-700">
+                    ₱{stock.unit_price?.toFixed(2)}
+                  </td>
+                </tr>
+              ))
+            ) : (
               <tr>
-                <td colSpan="5" className="text-center py-4 text-gray-400">
+                <td
+                  colSpan="5"
+                  className="text-center py-6 text-gray-500 text-sm"
+                >
                   No stock records found.
                 </td>
               </tr>
