@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
+import DataTable from "react-data-table-component";
+import { RiFileList3Fill } from "react-icons/ri";
+import { FaFileExcel } from "react-icons/fa";
 
 function RequestStock() {
   const [requests, setRequests] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    fetchRequests();
-  }, []);
 
   const fetchRequests = async () => {
     try {
@@ -20,6 +19,10 @@ function RequestStock() {
     }
   };
 
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
   const filteredRequests = requests.filter(
     (req) =>
       req.item_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -27,110 +30,110 @@ function RequestStock() {
       req.office_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+const user = JSON.parse(localStorage.getItem("user"));
+
+  const columns = [
+    { name: "Item Name", selector: row => row.item_name, sortable: true, left: true },
+    { name: "Category", selector: row => row.category, sortable: true, left: true },
+    { name: "Office", selector: row => row.office_name, sortable: true, left: true },
+    { name: "Quantity", selector: row => row.quantity, sortable: true, center: true },
+    { 
+      name: "Status",
+      selector: row => row.status,
+      center: true,
+      cell: row => (
+        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+          row.status === "Approved"
+            ? "bg-green-100 text-green-700"
+            : row.status === "Pending"
+            ? "bg-yellow-100 text-yellow-700"
+            : "bg-red-100 text-red-700"
+        }`}>{row.status}</span>
+      )
+    },
+    {
+      name: "Date Requested",
+      selector: row => new Date(row.request_date).toLocaleDateString(),
+      sortable: true,
+      center: true
+    }
+  ];
+
+  const customStyles = {
+    headCells: {
+      style: {
+        justifyContent: "flex-start",
+        textAlign: "left",
+        fontWeight: "bold",
+        fontSize: "14px",
+        backgroundColor: "#1E3A8A",
+        color: "white",
+        paddingTop: "12px",
+        paddingBottom: "12px",
+        paddingLeft: "16px",
+      },
+    },
+    cells: {
+      style: {
+        justifyContent: "flex-start",
+        textAlign: "left",
+        fontSize: "14px",
+        paddingTop: "10px",
+        paddingBottom: "10px",
+        paddingLeft: "16px",
+      },
+    },
+    rows: {
+      style: {
+        alignItems: "center",
+        minHeight: "50px",
+      },
+    },
+  };
+
   return (
-    <div className="w-full bg-white rounded-lg shadow-md p-6">
-      {/* Header Section */}
-      <div className="bg-[#0f2c56] text-white px-6 py-3 rounded-t-lg -mx-6 -mt-6 mb-6 flex justify-between items-center">
-        <h1 className="text-lg font-semibold flex items-center gap-2">
-          📋 Request List
-        </h1>
-      </div>
-
-      {/* Search Bar + Export Button */}
-      <div className="mb-6 flex items-center justify-between">
-        <input
-          type="text"
-          placeholder="Search item, category, or office..."
-          className="border border-gray-300 rounded-md px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-[#0f2c56]"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-
+    <div className="w-full h-full overflow-hidden">
+      {/* Header */}
+      <div className="flex justify-between items-center p-4 bg-[#172554] text-white rounded-lg shadow-md">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => window.print()}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            Export
-          </button>
+          <RiFileList3Fill className="text-2xl" />
+          <h1 className="text-lg font-semibold">Request Stock</h1>
         </div>
       </div>
 
-      {/* Table Section */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse border border-gray-300">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
-                Item Name
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
-                Category
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
-                Office
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700">
-                Quantity
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700">
-                Status
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700">
-                Date Requested
-              </th>
-            </tr>
-          </thead>
+      {/* Action Buttons */}
+      <div className="bg-white rounded-b-lg shadow-md mt-4 border border-gray-200 overflow-hidden">
+        <div className="flex justify-between items-center mb-4 px-4 mt-4">
+          <input
+            type="text"
+            placeholder="Search item, category, or office..."
+            className="border border-gray-300 rounded-md px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-[#172554]"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
 
-          <tbody>
-            {filteredRequests.length > 0 ? (
-              filteredRequests.map((req, index) => (
-                <tr
-                  key={index}
-                  className="hover:bg-gray-50 transition duration-150"
-                >
-                  <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
-                    {req.item_name}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
-                    {req.category}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
-                    {req.office_name}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2 text-sm text-center text-gray-700">
-                    {req.quantity}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2 text-sm text-center">
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-medium ${
-                        req.status === "Approved"
-                          ? "bg-green-100 text-green-700"
-                          : req.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {req.status}
-                    </span>
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2 text-sm text-center text-gray-700">
-                    {new Date(req.request_date).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="6"
-                  className="text-center py-6 text-gray-500 text-sm"
-                >
-                  No request records found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+          {(user?.role === "Admin" || user?.role === "Programmer") && (
+  <button className="flex items-center gap-2 px-3 py-2 bg-green-800 hover:bg-green-700 text-white rounded-md border border-green-900 transition font-medium">
+    <FaFileExcel className="text-lg" />
+    Export
+  </button>
+)}
+        </div>
+
+        {/* Data Table */}
+        <div className="relative w-full rounded-b-lg">
+          <DataTable
+            columns={columns}
+            data={filteredRequests}
+            pagination
+            highlightOnHover
+            striped
+            responsive
+            dense
+            customStyles={customStyles}
+            noDataComponent={<div className="text-gray-500 italic py-3">No request data found</div>}
+          />
+        </div>
       </div>
     </div>
   );

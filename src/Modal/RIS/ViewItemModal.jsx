@@ -33,6 +33,9 @@ function ViewItemModal({ isOpen, onClose, risId }) {
     setIsSupplierModalOpen(true);
   };
 
+  const user = JSON.parse(localStorage.getItem("user"));
+const canSeeActions = user?.role === "Admin" || user?.role === "Programmer";
+
   // ✅ Function to handle item approval
   const handleApprove = async (item) => {
     try {
@@ -148,31 +151,39 @@ function ViewItemModal({ isOpen, onClose, risId }) {
                             {item.Status || "Pending"}
                           </span>
                         </td>
-                        <td className="px-4 py-3 border-t border-gray-200 text-center">
-                          {canApprove ? (
-                            <button
-                              onClick={() => handleApprove(item)}
-                              disabled={isDisabled}
-                              className={`px-3 py-1.5 text-xs rounded-md shadow text-white transition ${
-                                isDisabled
-                                  ? "bg-gray-400 cursor-not-allowed"
-                                  : "bg-green-600 hover:bg-green-700"
-                              }`}>
-                              Approve
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleSelectSupplier(item)}
-                              disabled={isDisabled}
-                              className={`px-3 py-1.5 text-xs rounded-md shadow text-white transition ${
-                                isDisabled
-                                  ? "bg-gray-400 cursor-not-allowed"
-                                  : "bg-[#2563eb] hover:bg-[#1e40af]"
-                              }`}>
-                              Select Supplier
-                            </button>
-                          )}
-                        </td>
+                       <td className="px-4 py-3 border-t border-gray-200 text-center">
+  {canSeeActions ? (
+    canApprove ? (
+      <button
+        onClick={() => handleApprove(item)}
+        disabled={isDisabled}
+        className={`px-3 py-1.5 text-xs rounded-md shadow text-white transition ${
+          isDisabled
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-green-600 hover:bg-green-700"
+        }`}
+      >
+        Approve
+      </button>
+    ) : (
+      <button
+        onClick={() => handleSelectSupplier(item)}
+        disabled={isDisabled}
+        className={`px-3 py-1.5 text-xs rounded-md shadow text-white transition ${
+          isDisabled
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-[#2563eb] hover:bg-[#1e40af]"
+        }`}
+      >
+        Select Supplier
+      </button>
+    )
+  ) : (
+    // Regular users see nothing
+    <span className="text-gray-400 text-xs italic">No actions</span>
+  )}
+</td>
+
                       </tr>
                     );
                   })}

@@ -246,20 +246,26 @@ function Sidebar({ open, setOpen }) {
                 {userOpen && (
                   <div className="p-2 bg-sky-800 text-white">
                     <ul className="space-y-1">
-                      {userItems.map((item, index) => (
-                        <NavLink key={index} to={item.link} end>
-                          {({ isActive }) => (
-                            <li
-                              className={`cursor-pointer text-white transition-colors duration-200 ms-0 ps-4 border-s-2 border-white ${
-                                isActive
-                                  ? "bg-blue-800 font-semibold"
-                                  : "hover:bg-blue-800"
-                              }`}>
-                              {item.label}
-                            </li>
-                          )}
-                        </NavLink>
-                      ))}
+                      {userItems.map((item, index) => {
+                        // Hide "Users" link for non-Admin/Programmer users
+                        if (item.label === "Users" && !(user.role === "Admin" || user.role === "Programmer")) {
+                          return null;
+                        }
+
+                        return (
+                          <NavLink key={index} to={item.link} end>
+                            {({ isActive }) => (
+                              <li
+                                className={`cursor-pointer text-white transition-colors duration-200 ms-0 ps-4 border-s-2 border-white ${
+                                  isActive ? "bg-blue-800 font-semibold" : "hover:bg-blue-800"
+                                }`}
+                              >
+                                {item.label}
+                              </li>
+                            )}
+                          </NavLink>
+                        );
+                      })}
                     </ul>
                   </div>
                 )}

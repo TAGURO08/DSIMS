@@ -47,6 +47,8 @@ function RIS() {
     }
   };
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
   const handleViewItem = (row) => {
     setSelectedRIS(row.RIS_id);
     setIsViewOpen(true);
@@ -65,44 +67,29 @@ function RIS() {
       sortable: true,
       left: true,
     },
-    {
-      name: "Status",
-      selector: (row) => row.Status,
-      sortable: true,
-      left: true,
-      cell: (row) => (
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            row.Status === "Approved"
-              ? "bg-green-100 text-green-700"
-              : row.Status === "Pending"
-              ? "bg-yellow-100 text-yellow-700"
-              : row.Status === "Rejected"
-              ? "bg-red-100 text-red-700"
-              : "bg-gray-100 text-gray-600"
-          }`}>
-          {row.Status || "—"}
-        </span>
-      ),
-    },
-    {
-      name: "Actions",
-      left: true,
-      width: "200px",
-      cell: (row) => (
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleViewItem(row)}
-            className="px-3 py-1 bg-blue-700 hover:bg-blue-800 cursor-pointer text-white rounded-md text-xs font-medium transition">
-            View Item
-          </button>
+{
+  name: "Actions",
+  left: true,
+  width: "200px",
+  cell: (row) => (
+    <div className="flex gap-2">
+      <button
+        onClick={() => handleViewItem(row)}
+        className="px-3 py-1 bg-blue-700 hover:bg-blue-800 cursor-pointer text-white rounded-md text-xs font-medium transition"
+      >
+        View Item
+      </button>
 
-          <button className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-xs font-medium transition">
-            Complete
-          </button>
-        </div>
-      ),
-    },
+      {(user?.role === "Admin" || user?.role === "Programmer") && (
+        <button
+          className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-xs font-medium transition"
+        >
+          Complete
+        </button>
+      )}
+    </div>
+  ),
+}
   ];
 
   const customStyles = {
@@ -155,12 +142,13 @@ function RIS() {
             Add RIS
           </button>
 
-          <button className="flex items-center gap-2 px-3 py-2 bg-green-800 hover:bg-green-700 text-white rounded-md border border-green-900 transition font-medium">
-            <FaFileExcel className="text-lg" />
-            Export
-          </button>
-        </div>
-
+         {(user?.role === "Admin" || user?.role === "Programmer") && (
+    <button className="flex items-center gap-2 px-3 py-2 bg-green-800 hover:bg-green-700 text-white rounded-md border border-green-900 transition font-medium">
+      <FaFileExcel className="text-lg" />
+      Export
+    </button>
+  )}
+</div>
         <div className="relative w-full rounded-b-lg">
           <DataTable
             columns={columns}
