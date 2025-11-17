@@ -11,9 +11,11 @@ def fetch_ris_items(ris_id: int):
                 rd.Qty, 
                 rd.UnitPrice,
                 rd.Status,
-                i.StockQty
+                i.StockQty,
+                po.Status AS POStatus
             FROM RIS_Details rd
             LEFT JOIN Item i ON rd.ItemId = i.ItemId
+            LEFT JOIN Purchase_Order po ON po.RID_details_id = rd.RID_details_id
             WHERE rd.RIS_id = ?
         """, (ris_id,))
         

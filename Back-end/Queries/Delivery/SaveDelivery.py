@@ -7,11 +7,12 @@ def mark_as_delivered(purchase_id: int):
 
     try:
         cursor.execute("""
-            UPDATE RD
-            SET RD.Status = 'Delivered'
-            FROM RIS_Details RD
-            INNER JOIN Purchase_Order PO ON RD.RID_details_id = PO.RID_details_id
-            WHERE PO.PurchaseId = ?
+            UPDATE PO
+            SET PO.Status = 'Delivered'
+            FROM Purchase_Order PO
+            INNER JOIN RIS_Details RD 
+                ON RD.RID_details_id = PO.RID_details_id
+            WHERE PO.PurchaseId = ?;
         """, (purchase_id,))
 
         delivery_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

@@ -34,7 +34,7 @@ function ViewItemModal({ isOpen, onClose, risId }) {
   };
 
   const user = JSON.parse(localStorage.getItem("user"));
-const canSeeActions = user?.role === "Admin" || user?.role === "Programmer";
+  const canSeeActions = user?.role === "Admin" || user?.role === "Programmer";
 
   // ✅ Function to handle item approval
   const handleApprove = async (item) => {
@@ -122,7 +122,9 @@ const canSeeActions = user?.role === "Admin" || user?.role === "Programmer";
                   {items.map((item, index) => {
                     const canApprove = item.Qty <= item.StockQty; // ✅ can approve if stock is enough
                     const isDisabled =
-                      item.Status === "For Delivery" || item.Status === "Rejected";
+                      item.POStatus === "For Delivery" ||
+                      item.POStatus === "Delivered" ||
+                      item.Status === "Rejected";
 
                     return (
                       <tr
@@ -151,39 +153,46 @@ const canSeeActions = user?.role === "Admin" || user?.role === "Programmer";
                             {item.Status || "Pending"}
                           </span>
                         </td>
-                       <td className="px-4 py-3 border-t border-gray-200 text-center">
-  {canSeeActions ? (
-    canApprove ? (
-      <button
-        onClick={() => handleApprove(item)}
-        disabled={isDisabled}
-        className={`px-3 py-1.5 text-xs rounded-md shadow text-white transition ${
-          isDisabled
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-green-600 hover:bg-green-700"
-        }`}
-      >
-        Approve
-      </button>
-    ) : (
-      <button
-        onClick={() => handleSelectSupplier(item)}
-        disabled={isDisabled}
-        className={`px-3 py-1.5 text-xs rounded-md shadow text-white transition ${
-          isDisabled
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-[#2563eb] hover:bg-[#1e40af]"
-        }`}
-      >
-        Select Supplier
-      </button>
-    )
-  ) : (
-    // Regular users see nothing
-    <span className="text-gray-400 text-xs italic">No actions</span>
-  )}
-</td>
-
+                        <td className="px-4 py-3 border-t border-gray-200 text-center">
+                          {canSeeActions ? (
+                            item.POStatus === "Delivered" ? (
+                              // 👉 SHOW RECEIVE BUTTON
+                              <button
+                                onClick={() => handleReceive(item)}
+                                className="px-3 py-1.5 text-xs rounded-md shadow text-white bg-blue-600 hover:bg-blue-700 transition">
+                                Receive
+                              </button>
+                            ) : canApprove ? (
+                              // 👉 SHOW APPROVE BUTTON
+                              <button
+                                onClick={() => handleApprove(item)}
+                                disabled={isDisabled}
+                                className={`px-3 py-1.5 text-xs rounded-md shadow text-white transition ${
+                                  isDisabled
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-green-600 hover:bg-green-700"
+                                }`}>
+                                Approve
+                              </button>
+                            ) : (
+                              // 👉 SHOW SELECT SUPPLIER
+                              <button
+                                onClick={() => handleSelectSupplier(item)}
+                                disabled={isDisabled}
+                                className={`px-3 py-1.5 text-xs rounded-md shadow text-white transition ${
+                                  isDisabled
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-[#2563eb] hover:bg-[#1e40af]"
+                                }`}>
+                                Select Supplier
+                              </button>
+                            )
+                          ) : (
+                            <span className="text-gray-400 text-xs italic">
+                              No actions
+                            </span>
+                          )}
+                        </td>
                       </tr>
                     );
                   })}

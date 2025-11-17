@@ -5,7 +5,7 @@ def fetch_delivery_data():
     cursor = conn.cursor()
     try:
         query = """
-            SELECT PO.PurchaseId, I.ProductName, S.SupplierName, PO.QtyToOrder, PO.DateApproved, RD.Status
+            SELECT PO.PurchaseId, I.ProductName, S.SupplierName, PO.QtyToOrder, PO.DateApproved, PO.Status
             FROM Purchase_Order PO
             JOIN Supplier S ON PO.SupplierId = S.SupplierId
             JOIN RIS_Details RD ON PO.RID_details_id = RD.RID_details_id
