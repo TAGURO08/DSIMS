@@ -40,7 +40,7 @@ def approve_ris_item_query(RID_details_id, user_id):
 
         cursor.execute("""
             UPDATE RIS_Details
-            SET Status = 'Approved', 
+            SET Status = 'Released', 
                 id = ?
             WHERE RID_details_id = ?
         """, (user_id, RID_details_id))

@@ -22,7 +22,6 @@ def add_purchase_order_query(SupplierId, RID_details_id, QtyToOrder, user_id):
         """
         cursor.execute(sql_insert, (SupplierId, RID_details_id, DateApproved, PO_Number, QtyToOrder))
 
-        # ✅ GET RIS_id from RIS_Details
         cursor.execute("""
             SELECT RIS_id FROM RIS_Details WHERE RID_details_id = ?
         """, (RID_details_id,))
@@ -31,14 +30,12 @@ def add_purchase_order_query(SupplierId, RID_details_id, QtyToOrder, user_id):
         if ris_row:
             RIS_id = ris_row[0]
 
-            # ✅ UPDATE RIS table with user id from localStorage
             cursor.execute("""
                 UPDATE RIS
                 SET id = ?, Status = 'For Delivery'
                 WHERE RIS_id = ?
             """, (user_id, RIS_id))
 
-        # Update item stock
         cursor.execute("""
             SELECT ItemId, Qty FROM RIS_Details WHERE RID_details_id = ?
         """, (RID_details_id,))

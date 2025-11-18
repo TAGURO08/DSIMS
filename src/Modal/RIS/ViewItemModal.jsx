@@ -36,11 +36,11 @@ function ViewItemModal({ isOpen, onClose, risId }) {
   const user = JSON.parse(localStorage.getItem("user"));
   const canSeeActions = user?.role === "Admin" || user?.role === "Programmer";
 
-  // ✅ Function to handle item approval
+  // APPROVE
   const handleApprove = async (item) => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      if (!user || !user.id) {
+      if (!user?.id) {
         alert("User not found. Please log in again.");
         return;
       }
@@ -63,7 +63,7 @@ function ViewItemModal({ isOpen, onClose, risId }) {
 
       if (response.ok && result.status === "success") {
         alert("✅ " + result.message);
-        // Refresh list to show updated status
+
         setItems((prev) =>
           prev.map((it) =>
             it.RID_details_id === item.RID_details_id
@@ -77,6 +77,51 @@ function ViewItemModal({ isOpen, onClose, risId }) {
     } catch (err) {
       console.error("Approval failed:", err);
       alert("Error approving item. Please try again.");
+    }
+  };
+
+  // RECEIVE FUNCTION (UPDATED)
+  const handleReceive = async (item) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user?.id) {
+        alert("User not found.");
+        return;
+      }
+
+      const confirmReceive = window.confirm(
+        `Mark "${item.ProductName}" as received by the requester?`
+      );
+      if (!confirmReceive) return;
+
+      const response = await fetch("http://127.0.0.1:8000/ris/receive", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          RID_details_id: item.RID_details_id,
+          user_id: user.id,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.status === "success") {
+        alert("📦 Item successfully released to requester!");
+
+        // UPDATE UI
+        setItems((prev) =>
+          prev.map((it) =>
+            it.RID_details_id === item.RID_details_id
+              ? { ...it, Status: "Released" }
+              : it
+          )
+        );
+      } else {
+        alert("❌ Failed: " + (result.message || "Unknown error"));
+      }
+    } catch (err) {
+      console.error("Receive failed:", err);
+      alert("Error receiving item. Try again.");
     }
   };
 
@@ -105,7 +150,7 @@ function ViewItemModal({ isOpen, onClose, risId }) {
                       Product Name
                     </th>
                     <th className="px-4 py-3 text-center font-medium text-sm uppercase tracking-wide">
-                      Quantity
+                      Qty
                     </th>
                     <th className="px-4 py-3 text-center font-medium text-sm uppercase tracking-wide">
                       Unit Price
@@ -118,13 +163,17 @@ function ViewItemModal({ isOpen, onClose, risId }) {
                     </th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {items.map((item, index) => {
-                    const canApprove = item.Qty <= item.StockQty; // ✅ can approve if stock is enough
+                    const canApprove = item.Qty <= item.StockQty;
+
                     const isDisabled =
                       item.POStatus === "For Delivery" ||
                       item.POStatus === "Delivered" ||
                       item.Status === "Rejected";
+
+                    const isReleased = item.Status === "Released";
 
                     return (
                       <tr
@@ -132,42 +181,50 @@ function ViewItemModal({ isOpen, onClose, risId }) {
                         className={`${
                           index % 2 === 0 ? "bg-white" : "bg-gray-50"
                         } hover:bg-indigo-50 transition-colors`}>
-                        <td className="px-4 py-3 border-t border-gray-200">
+                        <td className="px-4 py-3 border-t">
                           {item.ProductName}
                         </td>
-                        <td className="px-4 py-3 border-t border-gray-200 text-center">
+                        <td className="px-4 py-3 border-t text-center">
                           {item.Qty}
                         </td>
-                        <td className="px-4 py-3 border-t border-gray-200 text-center">
+                        <td className="px-4 py-3 border-t text-center">
                           {item.UnitPrice}
                         </td>
-                        <td className="px-4 py-3 border-t border-gray-200 text-center">
+
+                        <td className="px-4 py-3 border-t text-center">
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-semibold ${
                               item.Status === "Approved"
                                 ? "bg-green-100 text-green-700"
                                 : item.Status === "Rejected"
                                 ? "bg-red-100 text-red-700"
+                                : item.Status === "Released"
+                                ? "bg-blue-100 text-blue-700"
                                 : "bg-yellow-100 text-yellow-700"
                             }`}>
                             {item.Status || "Pending"}
                           </span>
                         </td>
-                        <td className="px-4 py-3 border-t border-gray-200 text-center">
+
+                        <td className="px-4 py-3 border-t text-center">
                           {canSeeActions ? (
-                            item.POStatus === "Delivered" ? (
-                              // 👉 SHOW RECEIVE BUTTON
+                            isReleased ? (
+                              <button
+                                disabled
+                                className="px-3 py-1 text-xs rounded-md bg-gray-400 text-white cursor-not-allowed">
+                                Released
+                              </button>
+                            ) : item.POStatus === "Delivered" ? (
                               <button
                                 onClick={() => handleReceive(item)}
-                                className="px-3 py-1.5 text-xs rounded-md shadow text-white bg-blue-600 hover:bg-blue-700 transition">
+                                className="px-3 py-1 text-xs rounded-md bg-blue-600 text-white hover:bg-blue-700">
                                 Receive
                               </button>
                             ) : canApprove ? (
-                              // 👉 SHOW APPROVE BUTTON
                               <button
                                 onClick={() => handleApprove(item)}
                                 disabled={isDisabled}
-                                className={`px-3 py-1.5 text-xs rounded-md shadow text-white transition ${
+                                className={`px-3 py-1 text-xs rounded-md text-white ${
                                   isDisabled
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : "bg-green-600 hover:bg-green-700"
@@ -175,14 +232,13 @@ function ViewItemModal({ isOpen, onClose, risId }) {
                                 Approve
                               </button>
                             ) : (
-                              // 👉 SHOW SELECT SUPPLIER
                               <button
                                 onClick={() => handleSelectSupplier(item)}
                                 disabled={isDisabled}
-                                className={`px-3 py-1.5 text-xs rounded-md shadow text-white transition ${
+                                className={`px-3 py-1 text-xs rounded-md text-white ${
                                   isDisabled
                                     ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-[#2563eb] hover:bg-[#1e40af]"
+                                    : "bg-blue-600 hover:bg-blue-700"
                                 }`}>
                                 Select Supplier
                               </button>
@@ -204,14 +260,13 @@ function ViewItemModal({ isOpen, onClose, risId }) {
           <div className="mt-6 flex justify-end">
             <button
               onClick={onClose}
-              className="px-5 py-2.5 bg-[#dc2626] cursor-pointer text-white font-medium rounded-lg shadow-md hover:bg-[#b91c1c] transition">
+              className="px-5 py-2.5 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700">
               Close
             </button>
           </div>
         </div>
       </div>
 
-      {/* Supplier Modal */}
       <SupplierModal
         isOpen={isSupplierModalOpen}
         onClose={() => setIsSupplierModalOpen(false)}

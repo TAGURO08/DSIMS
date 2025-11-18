@@ -42,8 +42,8 @@ def add_ris_transaction(data):
             total_price = unit_price * quantity
 
             cursor.execute("""
-                INSERT INTO RIS_Details (ItemId, RIS_id, Qty, DateCreated, UnitPrice)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO RIS_Details (ItemId, RIS_id, Qty, DateCreated, UnitPrice, Status)
+                VALUES (?, ?, ?, ?, ?, 'Pending')
             """, (item_id, ris_id, quantity, date_created, total_price))
 
         conn.commit()

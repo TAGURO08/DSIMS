@@ -32,6 +32,7 @@ from Queries.RIS.Approve_ris import add_purchase_order_query
 from Queries.RIS.Direct_Approve import approve_ris_item_query
 from Queries.Delivery.FetchDelivery import fetch_delivery_data
 from Queries.Delivery.SaveDelivery import mark_as_delivered
+from Queries.RIS.ReceivePurchaseItem import receive_item_query
 app = FastAPI()
 
 app.add_middleware(
@@ -302,3 +303,16 @@ def mark_delivered(purchase_id: int):
     if result["status"] != "success":
         raise HTTPException(status_code=500, detail=result["message"])
     return {"status": "success", "message": result["message"]}
+
+class ReceiveItemBody(BaseModel):
+    RID_details_id: int
+    user_id: int  # for tracking, if needed
+
+@app.post("/ris/receive")
+def receive_ris_item(body: ReceiveItemBody):
+    result = receive_item_query(body.RID_details_id)
+
+    if result["status"] == "error":
+        raise HTTPException(status_code=400, detail=result["message"])
+
+    return result
