@@ -6,7 +6,6 @@ def receive_item_query(rid_details_id: int):
     cursor = conn.cursor()
 
     try:
-        # Fetch RIS item details and corresponding PO status
         cursor.execute("""
             SELECT RD.ItemId, RD.Qty, PO.Status as POStatus
             FROM RIS_Details RD
@@ -27,20 +26,17 @@ def receive_item_query(rid_details_id: int):
                 "message": f"Item cannot be received. PO status: {po_status or 'Not Delivered'}"
             }
 
-        # Deduct stock from Item table
         cursor.execute("""
             UPDATE Item
             SET StockQty = StockQty - ?
             WHERE ItemId = ?
         """, (qty_requested, item_id))
 
-        # Add stockcard OUT entry with RID_details_id
         cursor.execute("""
             INSERT INTO StockCard (ItemId, TransactionType, Qty, RID_details_id, DateTransacted)
             VALUES (?, 'OUT', ?, ?, GETDATE())
         """, (item_id, qty_requested, rid_details_id))
 
-        # Update RIS status to Received
         cursor.execute("""
             UPDATE RIS_Details
             SET Status = 'Released'

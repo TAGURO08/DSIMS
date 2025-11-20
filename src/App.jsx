@@ -20,7 +20,6 @@ import Supplier from "./Front-end/Supplier";
 import Category from "./Front-end/Category";
 import Login from "./Front-end/Login";
 import ProtectedRoute from "./Front-end/ProtectedRoute";
-import RequestStock from "./Front-end/RequestStock";
 import CurrentStock from "./Front-end/CurrentStock";
 import Delivery from "./Front-end/Delivery";
 
@@ -44,7 +43,6 @@ function AppLayout({ open, setOpen }) {
               </ProtectedRoute>
             }
           />
-          <Route path="/stockcard/request" element={<RequestStock />} />
           <Route path="/stockcard/current" element={<CurrentStock />} />
           <Route
             path="stockcard"

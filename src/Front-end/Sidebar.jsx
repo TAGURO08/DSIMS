@@ -18,11 +18,6 @@ function Sidebar({ open, setOpen }) {
     { label: "Users", link: "/user" },
   ];
 
-  const stockCardItems = [
-    { label: "📦 Request List", link: "/stockcard/request" },
-    { label: "📊 Current Stock", link: "/stockcard/current" },
-  ];
-
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -44,7 +39,6 @@ function Sidebar({ open, setOpen }) {
   return (
     <div className="flex h-screen">
       <aside className="w-45 sm:-50 md:w-55 lg:w-60 bg-[#172554] flex flex-col items-center p-2">
-        {/* 🧭 LOGO & USER INFO */}
         <div className="logo-container w-full flex rounded-xl bg-white">
           <div className="w-25 h-25 flex w-full">
             <img src={logo} alt="Logo" className="object-contain" />
@@ -67,11 +61,9 @@ function Sidebar({ open, setOpen }) {
           </div>
         </div>
 
-        {/* 🧭 SIDEBAR LINKS */}
         <div className="w-full h-full mt-7 relative">
           <div className="max-h-[64vh]">
             <ul className="text-white text-[15px] space-y-2">
-              {/* Dashboard */}
               <li>
                 <NavLink
                   to="/dashboard"
@@ -87,45 +79,21 @@ function Sidebar({ open, setOpen }) {
                 </NavLink>
               </li>
 
-              {/* Stock Card */}
-              <li
-                className={`rounded-lg hover:border-l-4 hover:bg-sky-700 border-white p-1.5 w-full ${
-                  stockCardOpen ? "bg-sky-700 border-l-4 border-b-2" : ""
-                }`}>
-                <button
-                  className="gap-3 w-full h-full transition-all flex border-white"
-                  type="button"
-                  onClick={() => setStockCardOpen(!stockCardOpen)}>
+              <li>
+                <NavLink
+                  to="/stockcard/current"
+                  className={({ isActive }) =>
+                    `flex gap-2 rounded-lg border-white p-1 items-center transition-all ${
+                      isActive
+                        ? "bg-sky-700 border-l-4 text-white"
+                        : "hover:bg-sky-700 hover:border-l-4"
+                    }`
+                  }>
                   <FaClipboardList className="text-[20px]" />
-                  <span className="flex justify-between items-center w-full whitespace-nowrap">
-                    Stock Card
-                  </span>
-                  <span>{stockCardOpen ? "▲" : "▼"}</span>
-                </button>
-
-                {stockCardOpen && (
-                  <div className="p-2 bg-sky-800 text-white">
-                    <ul className="space-y-1">
-                      {stockCardItems.map((item, index) => (
-                        <NavLink key={index} to={item.link} end>
-                          {({ isActive }) => (
-                            <li
-                              className={`cursor-pointer text-white transition-colors duration-200 ms-0 ps-4 border-s-2 border-white ${
-                                isActive
-                                  ? "bg-blue-800 font-semibold"
-                                  : "hover:bg-blue-800"
-                              }`}>
-                              {item.label}
-                            </li>
-                          )}
-                        </NavLink>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  Stock Card
+                </NavLink>
               </li>
 
-              {/* RIS */}
               <li>
                 <NavLink
                   to="/ris"
@@ -156,7 +124,6 @@ function Sidebar({ open, setOpen }) {
                 </NavLink>
               </li>
 
-              {/* Office Management */}
               <li>
                 <NavLink
                   to="/office"
@@ -172,62 +139,60 @@ function Sidebar({ open, setOpen }) {
                 </NavLink>
               </li>
 
-              {/* Item Management */}
-              {user && (user.role === "Admin" || user.role === "Programmer") && (
-                <li>
-                  <NavLink
-                    to="/itemManagement"
-                    className={({ isActive }) =>
-                      `flex gap-2 rounded-lg border-white p-1 items-center transition-all ${
-                        isActive
-                          ? "bg-sky-700 border-l-4 text-white"
-                          : "hover:bg-sky-700 hover:border-l-4"
-                      }`
-                    }>
-                    <AiFillProduct className="text-[20px]" />
-                    Item Management
-                  </NavLink>
-                </li>
-              )}
-              {/* Supplier */}
-              {user && (user.role === "Admin" || user.role === "Programmer") && (
-              <li>
-                <NavLink
-                  to="/supplier"
-                  className={({ isActive }) =>
-                    `flex gap-2 rounded-lg border-white p-1 items-center transition-all ${
-                      isActive
-                        ? "bg-sky-700 border-l-4 text-white"
-                        : "hover:bg-sky-700 hover:border-l-4"
-                    }`
-                  }>
-                  <FaTruck className="text-[20px]" />
-                  Suppliers
-                </NavLink>
-              </li>
-            )}
-              {/* Category */}
-             {user && (user.role === "Admin" || user.role === "Programmer") && (
-                <li>
-                  <NavLink
-                    to="/category"
-                    className={({ isActive }) =>
-                      `flex gap-2 rounded-lg border-white p-1 items-center transition-all ${
-                        isActive
-                          ? "bg-sky-700 border-l-4 text-white"
-                          : "hover:bg-sky-700 hover:border-l-4"
-                      }`
-                    }>
-                    <FaTags className="text-[20px]" />
-                    Category
-                  </NavLink>
-                </li>
-              )}
+              {user &&
+                (user.role === "Admin" || user.role === "Programmer") && (
+                  <li>
+                    <NavLink
+                      to="/itemManagement"
+                      className={({ isActive }) =>
+                        `flex gap-2 rounded-lg border-white p-1 items-center transition-all ${
+                          isActive
+                            ? "bg-sky-700 border-l-4 text-white"
+                            : "hover:bg-sky-700 hover:border-l-4"
+                        }`
+                      }>
+                      <AiFillProduct className="text-[20px]" />
+                      Item Management
+                    </NavLink>
+                  </li>
+                )}
+              {user &&
+                (user.role === "Admin" || user.role === "Programmer") && (
+                  <li>
+                    <NavLink
+                      to="/supplier"
+                      className={({ isActive }) =>
+                        `flex gap-2 rounded-lg border-white p-1 items-center transition-all ${
+                          isActive
+                            ? "bg-sky-700 border-l-4 text-white"
+                            : "hover:bg-sky-700 hover:border-l-4"
+                        }`
+                      }>
+                      <FaTruck className="text-[20px]" />
+                      Suppliers
+                    </NavLink>
+                  </li>
+                )}
+              {user &&
+                (user.role === "Admin" || user.role === "Programmer") && (
+                  <li>
+                    <NavLink
+                      to="/category"
+                      className={({ isActive }) =>
+                        `flex gap-2 rounded-lg border-white p-1 items-center transition-all ${
+                          isActive
+                            ? "bg-sky-700 border-l-4 text-white"
+                            : "hover:bg-sky-700 hover:border-l-4"
+                        }`
+                      }>
+                      <FaTags className="text-[20px]" />
+                      Category
+                    </NavLink>
+                  </li>
+                )}
             </ul>
 
-            {/* User Management + Logout */}
             <ul className="text-white absolute inset-x-0 bottom-0 space-y-2">
-              {/* User Management */}
               <li
                 className={`rounded-lg hover:border-l-4 hover:bg-sky-700 border-white p-1.5 w-full ${
                   userOpen ? "bg-sky-700 border-l-4 border-b-2" : ""
@@ -247,8 +212,10 @@ function Sidebar({ open, setOpen }) {
                   <div className="p-2 bg-sky-800 text-white">
                     <ul className="space-y-1">
                       {userItems.map((item, index) => {
-                        // Hide "Users" link for non-Admin/Programmer users
-                        if (item.label === "Users" && !(user.role === "Admin" || user.role === "Programmer")) {
+                        if (
+                          item.label === "Users" &&
+                          !(user.role === "Admin" || user.role === "Programmer")
+                        ) {
                           return null;
                         }
 
@@ -257,9 +224,10 @@ function Sidebar({ open, setOpen }) {
                             {({ isActive }) => (
                               <li
                                 className={`cursor-pointer text-white transition-colors duration-200 ms-0 ps-4 border-s-2 border-white ${
-                                  isActive ? "bg-blue-800 font-semibold" : "hover:bg-blue-800"
-                                }`}
-                              >
+                                  isActive
+                                    ? "bg-blue-800 font-semibold"
+                                    : "hover:bg-blue-800"
+                                }`}>
                                 {item.label}
                               </li>
                             )}
@@ -271,7 +239,6 @@ function Sidebar({ open, setOpen }) {
                 )}
               </li>
 
-              {/* Logout */}
               <li
                 onClick={handleLogout}
                 className="flex gap-2 rounded-lg hover:border-l-4 hover:bg-sky-700 border-white p-1 cursor-pointer">

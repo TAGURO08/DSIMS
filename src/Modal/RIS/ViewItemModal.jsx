@@ -36,7 +36,6 @@ function ViewItemModal({ isOpen, onClose, risId }) {
   const user = JSON.parse(localStorage.getItem("user"));
   const canSeeActions = user?.role === "Admin" || user?.role === "Programmer";
 
-  // APPROVE
   const handleApprove = async (item) => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
@@ -108,7 +107,6 @@ function ViewItemModal({ isOpen, onClose, risId }) {
       if (response.ok && result.status === "success") {
         alert("📦 Item successfully released to requester!");
 
-        // UPDATE UI
         setItems((prev) =>
           prev.map((it) =>
             it.RID_details_id === item.RID_details_id
