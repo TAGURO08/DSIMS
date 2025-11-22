@@ -10,15 +10,19 @@ def fetch_ris_data():
                 r.RIS_id,
                 r.Order_by,
                 r.DateRequested,
+                CONCAT(u.fname, ' ', u.mname, '. ', u.lname) AS FullName,
                 (
                     SELECT MAX(sc.DateTransacted)
                     FROM StockCard sc
-                    JOIN RIS_Details rd ON sc.RID_details_id = rd.RID_details_id
-                    WHERE rd.RIS_id = r.RIS_id
+                    JOIN RIS_Details rd2 ON sc.RID_details_id = rd2.RID_details_id
+                    WHERE rd2.RIS_id = r.RIS_id
                 ) AS DateReceived,
+
                 r.Status
             FROM RIS r
-            ORDER BY r.DateRequested DESC
+            LEFT JOIN RIS_Details rd ON r.RIS_id = rd.RIS_id
+            LEFT JOIN [User] u ON rd.id = u.id
+            ORDER BY r.DateRequested DESC;
         """)
         rows = cursor.fetchall()
         columns = [col[0] for col in cursor.description]

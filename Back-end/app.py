@@ -33,6 +33,7 @@ from Queries.RIS.Direct_Approve import approve_ris_item_query
 from Queries.Delivery.FetchDelivery import fetch_delivery_data
 from Queries.Delivery.SaveDelivery import mark_as_delivered
 from Queries.RIS.ReceivePurchaseItem import receive_item_query
+from Queries.RIS.UpdateRISStatus import update_ris_status
 app = FastAPI()
 
 app.add_middleware(
@@ -316,3 +317,16 @@ def receive_ris_item(body: ReceiveItemBody):
         raise HTTPException(status_code=400, detail=result["message"])
 
     return result
+
+class CompleteRISBody(BaseModel):
+    ris_id: int
+
+@app.put("/ris/complete")
+def complete_ris(body: CompleteRISBody):
+    try:
+        result = update_ris_status(body.ris_id, "Completed")
+        if result["status"] != "success":
+            raise HTTPException(status_code=400, detail=result["message"])
+        return {"status": "success", "message": "RIS marked as Completed"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

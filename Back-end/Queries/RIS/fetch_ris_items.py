@@ -5,7 +5,8 @@ def fetch_ris_items(ris_id: int):
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            SELECT 
+            
+  SELECT 
                 rd.RID_details_id, 
                 i.ProductName, 
                 rd.Qty, 
@@ -13,11 +14,13 @@ def fetch_ris_items(ris_id: int):
                 rd.Status,
                 i.StockQty,
                 po.Status AS POStatus,
-                s.SupplierName AS SupplierName
+                s.SupplierName AS SupplierName,
+                name = u.fname + ' '+ mname + ' ' + lname
             FROM RIS_Details rd
             LEFT JOIN Item i ON rd.ItemId = i.ItemId
             LEFT JOIN Purchase_Order po ON po.RID_details_id = rd.RID_details_id
             LEFT JOIN Supplier s ON po.SupplierId = s.SupplierId
+            LEFT JOIN [User] u ON rd.id = u.id
             WHERE rd.RIS_id = ?
         """, (ris_id,))
         

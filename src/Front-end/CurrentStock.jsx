@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import { AiOutlineStock } from "react-icons/ai";
-import { FaFileExcel } from "react-icons/fa";
 import ViewRISItemsModal from "../Modal/RIS/ViewRISItemsModal";
+import { generateRISPrintHTML } from "../PrintTemplates/risPrintTemplate";
 
 function CurrentStock() {
   const [risList, setRisList] = useState([]);
@@ -29,11 +29,11 @@ function CurrentStock() {
     fetchRIS();
   }, []);
 
-  const filteredRIS = risList.filter((r) =>
-    r.Order_by?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const user = JSON.parse(localStorage.getItem("user"));
+  const filteredRIS = risList
+    .filter((r) => r.Status === "Completed")
+    .filter((r) =>
+      r.Order_by?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   const formatDate = (dateString) => {
     if (!dateString) return "—";
@@ -45,6 +45,32 @@ function CurrentStock() {
       });
     } catch {
       return dateString;
+    }
+  };
+
+  const handleViewItem = (row) => {
+    setSelectedRIS(row.RIS_id);
+    setIsViewOpen(true);
+  };
+
+  // ===== PDF with items =====
+  const handlePrintPDF = async (row) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/ris/items/${row.RIS_id}`);
+      const data = await res.json();
+      const items =
+        data.status === "success" && Array.isArray(data.data) ? data.data : [];
+      const issuer = JSON.parse(localStorage.getItem("user")) || {};
+      const html = generateRISPrintHTML(row, items, issuer);
+      const w = window.open("", "_blank");
+      if (!w) return alert("Unable to open print window. Please allow popups.");
+      w.document.write(html);
+      w.document.close();
+      w.focus();
+      setTimeout(() => w.print(), 400);
+    } catch (err) {
+      console.error("Print error:", err);
+      alert("Failed to prepare print. Please try again.");
     }
   };
 
@@ -62,6 +88,12 @@ function CurrentStock() {
       left: true,
     },
     {
+      name: "Approved By",
+      selector: (row) => row.FullName || "—",
+      sortable: true,
+      left: true,
+    },
+    {
       name: "Date Received",
       selector: (row) => formatDate(row.DateReceived),
       sortable: true,
@@ -70,7 +102,7 @@ function CurrentStock() {
     {
       name: "Actions",
       left: true,
-      width: "220px",
+      width: "170px",
       cell: (row) => (
         <div className="flex gap-2">
           <button
@@ -78,9 +110,8 @@ function CurrentStock() {
             className="px-3 py-1 bg-blue-700 hover:bg-blue-800 cursor-pointer text-white rounded-md text-xs font-medium transition">
             View Item
           </button>
-
           <button
-            onClick={() => handlePrint(row)}
+            onClick={() => handlePrintPDF(row)}
             className="px-3 py-1 bg-gray-700 hover:bg-gray-800 cursor-pointer text-white rounded-md text-xs font-medium transition">
             Print
           </button>
@@ -121,42 +152,12 @@ function CurrentStock() {
     },
   };
 
-  const handleViewItem = (row) => {
-    setSelectedRIS(row.RIS_id);
-    setIsViewOpen(true);
-  };
-
-  const handlePrint = (row) => {
-    try {
-      const content = `
-        <div style="font-family: Arial, sans-serif; padding:20px;">
-          <h2>Requisition and Issue Slip</h2>
-          <p><strong>Order By:</strong> ${row.Order_by ?? ""}</p>
-          <p><strong>Date Requested:</strong> ${formatDate(
-            row.DateRequested
-          )}</p>
-          <p><strong>RIS ID:</strong> ${row.RIS_id ?? ""}</p>
-        </div>
-      `;
-      const w = window.open("", "_blank");
-      if (!w) return alert("Unable to open print window. Please allow popups.");
-      w.document.write(
-        `<!doctype html><html><head><title>Print RIS</title></head><body>${content}</body></html>`
-      );
-      w.document.close();
-      w.focus();
-      w.print();
-    } catch (err) {
-      console.error("Print error:", err);
-    }
-  };
-
   return (
     <div className="w-full h-full overflow-hidden">
       <div className="flex justify-between items-center p-4 bg-[#172554] text-white rounded-lg shadow-md">
         <div className="flex items-center gap-2">
           <AiOutlineStock className="text-2xl" />
-          <h1 className="text-lg font-semibold">RIS List</h1>
+          <h1 className="text-lg font-semibold">RIS List (Completed)</h1>
         </div>
       </div>
 
@@ -182,7 +183,9 @@ function CurrentStock() {
             dense
             customStyles={customStyles}
             noDataComponent={
-              <div className="text-gray-500 italic py-3">No RIS data found</div>
+              <div className="text-gray-500 italic py-3">
+                No completed RIS found
+              </div>
             }
           />
         </div>
@@ -198,5 +201,3 @@ function CurrentStock() {
 }
 
 export default CurrentStock;
-
-// Modal placement at bottom to avoid JSX nesting issues

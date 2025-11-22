@@ -47,6 +47,31 @@ function RIS() {
     }
   };
 
+  const handleCompleteRIS = async (row) => {
+    const confirmComplete = window.confirm(
+      `Are you sure you want to mark RIS #${row.RIS_id} as Completed?`
+    );
+    if (!confirmComplete) return;
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/ris/complete", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ris_id: row.RIS_id }),
+      });
+      const result = await response.json();
+      if (response.ok) {
+        alert("✅ " + result.message);
+        fetchRIS(); // refresh table
+      } else {
+        alert("❌ Failed: " + result.detail || "Unknown error");
+      }
+    } catch (err) {
+      console.error("Complete RIS failed:", err);
+      alert("Error marking RIS as completed. Try again.");
+    }
+  };
+
   const user = JSON.parse(localStorage.getItem("user"));
 
   const handleViewItem = (row) => {
@@ -62,34 +87,66 @@ function RIS() {
       left: true,
     },
     {
+      name: "Status",
+      selector: (row) => row.Status,
+      sortable: true,
+      left: true,
+      cell: (row) => {
+        let bgColor = "";
+        switch (row.Status) {
+          case "Pending":
+            bgColor = "bg-yellow-500";
+            break;
+          case "Approved":
+            bgColor = "bg-blue-500";
+            break;
+          case "Completed":
+            bgColor = "bg-green-600";
+            break;
+          case "Rejected":
+            bgColor = "bg-red-600";
+            break;
+          default:
+            bgColor = "bg-gray-400";
+            break;
+        }
+        return (
+          <span
+            className={`px-2 py-1 rounded-lg text-xs font-semibold text-white ${bgColor}`}>
+            {row.Status}
+          </span>
+        );
+      },
+    },
+    {
       name: "Date Requested",
       selector: (row) => formatDate(row.DateRequested),
       sortable: true,
       left: true,
     },
-{
-  name: "Actions",
-  left: true,
-  width: "200px",
-  cell: (row) => (
-    <div className="flex gap-2">
-      <button
-        onClick={() => handleViewItem(row)}
-        className="px-3 py-1 bg-blue-700 hover:bg-blue-800 cursor-pointer text-white rounded-md text-xs font-medium transition"
-      >
-        View Item
-      </button>
+    {
+      name: "Actions",
+      left: true,
+      width: "200px",
+      cell: (row) => (
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleViewItem(row)}
+            className="px-3 py-1 bg-blue-700 hover:bg-blue-800 cursor-pointer text-white rounded-md text-xs font-medium transition">
+            View Item
+          </button>
 
-      {(user?.role === "Admin" || user?.role === "Programmer") && (
-        <button
-          className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-xs font-medium transition"
-        >
-          Complete
-        </button>
-      )}
-    </div>
-  ),
-}
+          {(user?.role === "Admin" || user?.role === "Programmer") &&
+            row.Status !== "Completed" && (
+              <button
+                onClick={() => handleCompleteRIS(row)}
+                className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-xs font-medium transition">
+                Complete
+              </button>
+            )}
+        </div>
+      ),
+    },
   ];
 
   const customStyles = {
@@ -142,13 +199,13 @@ function RIS() {
             Add RIS
           </button>
 
-         {(user?.role === "Admin" || user?.role === "Programmer") && (
-    <button className="flex items-center gap-2 px-3 py-2 bg-green-800 hover:bg-green-700 text-white rounded-md border border-green-900 transition font-medium">
-      <FaFileExcel className="text-lg" />
-      Export
-    </button>
-  )}
-</div>
+          {(user?.role === "Admin" || user?.role === "Programmer") && (
+            <button className="flex items-center gap-2 px-3 py-2 bg-green-800 hover:bg-green-700 text-white rounded-md border border-green-900 transition font-medium">
+              <FaFileExcel className="text-lg" />
+              Export
+            </button>
+          )}
+        </div>
         <div className="relative w-full rounded-b-lg">
           <DataTable
             columns={columns}
@@ -182,6 +239,7 @@ function RIS() {
         isOpen={isViewOpen}
         onClose={() => setIsViewOpen(false)}
         risId={selectedRIS}
+        onUpdate={fetchRIS}
       />
     </div>
   );

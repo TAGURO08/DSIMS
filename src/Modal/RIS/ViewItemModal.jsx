@@ -1,18 +1,34 @@
 import React, { useEffect, useState } from "react";
 import SupplierModal from "./SupplierModal";
 
-function ViewItemModal({ isOpen, onClose, risId }) {
+function ViewItemModal({ isOpen, onClose, risId, onUpdate }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isSupplierModalOpen, setIsSupplierModalOpen] = useState(false);
 
+  // 🔥 FUNCTION TO REFRESH ITEMS WITHOUT CLOSING MODAL
+  const refreshItems = async () => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/ris/items/${risId}`);
+      const data = await res.json();
+
+      if (data.status === "success" && Array.isArray(data.data)) {
+        setItems(data.data);
+      }
+    } catch (err) {
+      console.error("Refresh error:", err);
+    }
+  };
+
   useEffect(() => {
     const fetchItems = async () => {
       if (!isOpen || !risId) return;
+
       try {
         const res = await fetch(`http://127.0.0.1:8000/ris/items/${risId}`);
         const data = await res.json();
+
         if (data.status === "success" && Array.isArray(data.data)) {
           setItems(data.data);
         } else {
@@ -25,6 +41,7 @@ function ViewItemModal({ isOpen, onClose, risId }) {
         setLoading(false);
       }
     };
+
     fetchItems();
   }, [isOpen, risId]);
 
@@ -63,13 +80,9 @@ function ViewItemModal({ isOpen, onClose, risId }) {
       if (response.ok && result.status === "success") {
         alert("✅ " + result.message);
 
-        setItems((prev) =>
-          prev.map((it) =>
-            it.RID_details_id === item.RID_details_id
-              ? { ...it, Status: "Approved" }
-              : it
-          )
-        );
+        await refreshItems(); // 🔥 AUTO UPDATE TABLE
+
+        if (onUpdate) onUpdate();
       } else {
         alert("❌ Failed: " + (result.message || "Unknown error"));
       }
@@ -79,7 +92,6 @@ function ViewItemModal({ isOpen, onClose, risId }) {
     }
   };
 
-  // RECEIVE FUNCTION (UPDATED)
   const handleReceive = async (item) => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
@@ -107,13 +119,9 @@ function ViewItemModal({ isOpen, onClose, risId }) {
       if (response.ok && result.status === "success") {
         alert("📦 Item successfully released to requester!");
 
-        setItems((prev) =>
-          prev.map((it) =>
-            it.RID_details_id === item.RID_details_id
-              ? { ...it, Status: "Released" }
-              : it
-          )
-        );
+        await refreshItems(); // 🔥 AUTO UPDATE TABLE
+
+        if (onUpdate) onUpdate();
       } else {
         alert("❌ Failed: " + (result.message || "Unknown error"));
       }
@@ -161,16 +169,13 @@ function ViewItemModal({ isOpen, onClose, risId }) {
                     </th>
                   </tr>
                 </thead>
-
                 <tbody>
                   {items.map((item, index) => {
                     const canApprove = item.Qty <= item.StockQty;
-
                     const isDisabled =
                       item.POStatus === "For Delivery" ||
                       item.POStatus === "Delivered" ||
                       item.Status === "Rejected";
-
                     const isReleased = item.Status === "Released";
 
                     return (
@@ -188,7 +193,6 @@ function ViewItemModal({ isOpen, onClose, risId }) {
                         <td className="px-4 py-3 border-t text-center">
                           {item.UnitPrice}
                         </td>
-
                         <td className="px-4 py-3 border-t text-center">
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -269,6 +273,7 @@ function ViewItemModal({ isOpen, onClose, risId }) {
         isOpen={isSupplierModalOpen}
         onClose={() => setIsSupplierModalOpen(false)}
         item={selectedItem}
+        onAfterOrder={refreshItems} // 🔥 VERY IMPORTANT
       />
     </>
   );

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 
-function SupplierModal({ isOpen, onClose, item }) {
+function SupplierModal({ isOpen, onClose, item, onAfterOrder }) {
   const [suppliers, setSuppliers] = useState([]);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  // 🔥 Get logged-in user from localStorage
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
@@ -42,6 +44,11 @@ function SupplierModal({ isOpen, onClose, item }) {
       return;
     }
 
+    if (!user?.id) {
+      alert("User ID not found in localStorage!");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const response = await fetch("http://localhost:8000/purchase_order/add", {
@@ -60,6 +67,9 @@ function SupplierModal({ isOpen, onClose, item }) {
       const result = await response.json();
       if (response.ok) {
         alert(`✅ ${result.message}\nPO Number: ${result.PO_Number}`);
+
+        if (onAfterOrder) onAfterOrder();
+
         onClose();
       } else {
         alert(`❌ Failed: ${result.detail || "Unknown error"}`);
@@ -128,7 +138,7 @@ function SupplierModal({ isOpen, onClose, item }) {
           </button>
           <button
             onClick={handleApprove}
-            className="px-4 py-2 bg-green-600 text-white text-sm cursor-pointer rounded-lg hover:bg-green-800 transition"
+            className="px-4 py-2 bg-green-600 text-white text-sm cursor-pointer rounded-lg hover:bg-green-700 transition"
             disabled={submitting}>
             {submitting ? "Processing..." : "Order"}
           </button>

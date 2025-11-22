@@ -6,7 +6,7 @@ def approve_ris_item_query(RID_details_id, user_id):
         cursor = conn.cursor()
 
         cursor.execute("""
-            SELECT ItemId, Qty
+            SELECT ItemId, Qty, RIS_id
             FROM RIS_Details
             WHERE RID_details_id = ?
         """, (RID_details_id,))
@@ -15,7 +15,7 @@ def approve_ris_item_query(RID_details_id, user_id):
         if not row:
             return {"status": "error", "message": "RIS item not found."}
 
-        item_id, req_qty = row
+        item_id, req_qty, ris_id = row
 
         cursor.execute("""
             SELECT StockQty 

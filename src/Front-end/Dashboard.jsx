@@ -48,8 +48,7 @@ function Dashboard() {
         <ResponsiveContainer width="100%" height={350}>
           <BarChart
             data={stocks}
-            margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-          >
+            margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="item_name" tick={{ fontSize: 12 }} />
             <YAxis />
@@ -58,8 +57,7 @@ function Dashboard() {
               dataKey="quantity"
               fill="#0f2c56"
               barSize={40}
-              radius={[5, 5, 0, 0]}
-            >
+              radius={[5, 5, 0, 0]}>
               <LabelList
                 dataKey="quantity"
                 position="top"
@@ -71,62 +69,17 @@ function Dashboard() {
       </div>
 
       {/* Low Stock Button */}
-{lowStockItems.length > 0 && (
-  <div className="flex justify-end">
-    <button
-      onClick={() => setShowLowStock(!showLowStock)}
-      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-    >
-      {showLowStock
-        ? "Hide Low Stock Items"
-        : `View Low Stock Items (${lowStockItems.length})`}
-    </button>
-  </div>
-)}
-
-{/* Low Stock Table */}
-{showLowStock && (
-  <div className="bg-red-50 border border-red-400 rounded-lg shadow-md p-6 mt-4 overflow-x-auto">
-    <h2 className="font-semibold text-lg mb-2">⚠️ Low Stock Items</h2>
-    <table className="min-w-full border-collapse border border-gray-300">
-      <thead className="bg-red-100">
-        <tr>
-          <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
-            Item Name
-          </th>
-          <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
-            Category
-          </th>
-          <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
-            Supplier
-          </th>
-          <th className="border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700">
-            Quantity
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {lowStockItems.map((item, index) => (
-          <tr key={index} className="hover:bg-red-100 transition duration-150">
-            <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
-              {item.item_name}
-            </td>
-            <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
-              {item.category}
-            </td>
-            <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
-              {item.supplier_name}
-            </td>
-            <td className="border border-gray-300 px-4 py-2 text-sm text-center text-gray-700">
-              {item.quantity}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-)}
-
+      {lowStockItems.length > 0 && (
+        <div className="flex justify-end">
+          <button
+            onClick={() => setShowLowStock(!showLowStock)}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+            {showLowStock
+              ? "Hide Low Stock Items"
+              : `View Low Stock Items (${lowStockItems.length})`}
+          </button>
+        </div>
+      )}
 
       {/* Low Stock Table */}
       {showLowStock && (
@@ -151,7 +104,54 @@ function Dashboard() {
             </thead>
             <tbody>
               {lowStockItems.map((item, index) => (
-                <tr key={index} className="hover:bg-red-100 transition duration-150">
+                <tr
+                  key={index}
+                  className="hover:bg-red-100 transition duration-150">
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
+                    {item.item_name}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
+                    {item.category}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
+                    {item.supplier_name}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-sm text-center text-gray-700">
+                    {item.quantity}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Low Stock Table */}
+      {showLowStock && (
+        <div className="bg-red-50 border border-red-400 rounded-lg shadow-md p-6 mt-4 overflow-x-auto">
+          <h2 className="font-semibold text-lg mb-2">⚠️ Low Stock Items</h2>
+          <table className="min-w-full border-collapse border border-gray-300">
+            <thead className="bg-red-100">
+              <tr>
+                <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Item Name
+                </th>
+                <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Category
+                </th>
+                <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Supplier
+                </th>
+                <th className="border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700">
+                  Quantity
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {lowStockItems.map((item, index) => (
+                <tr
+                  key={index}
+                  className="hover:bg-red-100 transition duration-150">
                   <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
                     {item.item_name}
                   </td>

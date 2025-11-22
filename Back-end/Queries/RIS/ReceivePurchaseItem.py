@@ -7,7 +7,7 @@ def receive_item_query(rid_details_id: int):
 
     try:
         cursor.execute("""
-            SELECT RD.ItemId, RD.Qty, PO.Status as POStatus
+            SELECT RD.ItemId, RD.Qty, PO.Status as POStatus, RD.RIS_id
             FROM RIS_Details RD
             LEFT JOIN Purchase_Order PO
                 ON RD.RID_details_id = PO.RID_details_id
@@ -18,7 +18,7 @@ def receive_item_query(rid_details_id: int):
         if not row:
             return {"status": "error", "message": "RIS item not found"}
 
-        item_id, qty_requested, po_status = row
+        item_id, qty_requested, po_status, ris_id = row
 
         if po_status != "Delivered":
             return {
