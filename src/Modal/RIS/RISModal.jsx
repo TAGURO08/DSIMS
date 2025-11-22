@@ -12,6 +12,7 @@ function RISModal({ isAddOpen, onClose, onSuccess }) {
     { itemName: "", quantity: "", orderBy: "", stockQty: 0 },
   ]);
   const [errors, setErrors] = useState({});
+  const [showList, setShowList] = useState(false);
 
   useEffect(() => {
     fetch("http://127.0.0.1:8000/item/select-list")
@@ -113,9 +114,18 @@ function RISModal({ isAddOpen, onClose, onSuccess }) {
     }
   };
 
+  const handleCancel = () => {
+    // reset form state
+    setRows([{ itemName: "", quantity: "", orderBy: "", stockQty: 0 }]);
+    setErrors({});
+    setShowList(false);
+    // call parent onClose to hide modal
+    if (onClose) onClose();
+  };
+
   return (
     <div className={containerClass}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-gray-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-gray-200 max-h-[90vh] flex flex-col">
         <div className="flex justify-between items-center border-b pb-3 mb-5">
           <h2 className="text-lg font-semibold text-gray-800">Add RIS</h2>
           <button
@@ -124,8 +134,7 @@ function RISModal({ isAddOpen, onClose, onSuccess }) {
             &times;
           </button>
         </div>
-
-        <div className="space-y-5 max-h-[400px] overflow-y-auto pr-1">
+        <div className="flex-1 overflow-y-auto pr-1 space-y-5">
           {rows.map((row, index) => (
             <div
               key={index}
@@ -214,17 +223,62 @@ function RISModal({ isAddOpen, onClose, onSuccess }) {
               )}
             </div>
           ))}
+          <button
+            onClick={addRow}
+            className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 text-sm font-medium">
+            + Add Another Item
+          </button>
+
+          <div className="mt-3">
+            <button
+              onClick={() => setShowList((s) => !s)}
+              className="w-full mb-2 border border-gray-300 rounded-lg py-2 text-sm bg-white hover:bg-gray-50">
+              {showList ? "Hide Entered Items" : "Show Entered Items"}
+            </button>
+
+            {showList && (
+              <div className="p-3 border rounded-lg bg-gray-50 max-h-48 overflow-y-auto">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs text-gray-600">
+                      <th className="pb-2">#</th>
+                      <th className="pb-2">Item</th>
+                      <th className="pb-2">Quantity</th>
+                      <th className="pb-2">Order By</th>
+                      <th className="pb-2">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((r, i) => {
+                      const itemLabel = items.find((it) => it.value === r.itemName)?.label || r.itemName || "-";
+                      return (
+                        <tr key={i} className="border-t">
+                          <td className="py-2 pr-3">{i + 1}</td>
+                          <td className="py-2 pr-3">{itemLabel}</td>
+                          <td className="py-2 pr-3">{r.quantity || "-"}</td>
+                          <td className="py-2 pr-3">{i === 0 ? r.orderBy || "-" : "-"}</td>
+                          <td className="py-2 pr-3">
+                            <button
+                              onClick={() => {
+                                if (confirm("Remove this item from the list?")) removeRow(i);
+                              }}
+                              className="text-red-600 hover:text-red-800 px-2 py-1 rounded-md text-sm">
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
 
-        <button
-          onClick={addRow}
-          className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 text-sm font-medium">
-          + Add Another Item
-        </button>
-
-        <div className="flex justify-end gap-2 mt-5">
+        <div className="mt-4 flex justify-end gap-2">
           <button
-            onClick={onClose}
+            onClick={handleCancel}
             className="px-4 py-2 text-sm rounded-lg bg-gray-200 hover:bg-gray-300">
             Cancel
           </button>
