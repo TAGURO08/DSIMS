@@ -28,6 +28,7 @@ from Queries.RIS.GetItemList import get_item_list
 from Queries.RIS.AddRIS import add_ris_transaction
 from Queries.RIS.FetchRIS import fetch_ris_data
 from Queries.RIS.fetch_ris_items import fetch_ris_items
+from Queries.RIS.FetchRISAggregated import fetch_aggregated_ris_items
 from Queries.RIS.Approve_ris import add_purchase_order_query
 from Queries.RIS.Direct_Approve import approve_ris_item_query
 from Queries.Delivery.FetchDelivery import fetch_delivery_data
@@ -266,6 +267,14 @@ def get_ris_items(ris_id: int):
     result = fetch_ris_items(ris_id)
     if result["status"] == "error":
         raise HTTPException(status_code=500, detail=result["message"])
+    return result
+
+
+@app.get("/ris/aggregated-items")
+def ris_aggregated_items():
+    result = fetch_aggregated_ris_items()
+    if result.get("status") == "error":
+        raise HTTPException(status_code=500, detail=result.get("message"))
     return result
 
 class PurchaseOrderRequest(BaseModel):
